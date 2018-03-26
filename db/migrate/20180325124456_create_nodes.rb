@@ -2,7 +2,7 @@ class CreateNodes < ActiveRecord::Migration[5.1]
   def change
     create_table :nodes do |t|
       t.string :name
-      t.string :icon
+      t.string :element
 	  t.string :category #customer, solution, endeavour
       t.integer :x
       t.integer :y

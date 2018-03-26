@@ -8,16 +8,19 @@
 AR = EssenceMethod.create({name: "Agile Retrospective Essentials"})
 
 improvement = Node.create({name: "Improvement",
-						   icon: "alpha",
+						   element: "alpha",
 						   category: "endeavour",
 						   x: 50,
 						   y: 50,
 						   r: 20,
 						   essence_method: AR})
 wayofworking = Node.create({name: "Way of Working",
-							icon: "alpha",
+							element: "alpha",
 							category: "endeavour",
 							x: 80, 
 							y: 80,
 							r: 20,
 							essence_method: AR})
+wayofworking.parents.append improvement
+wayofworking.save!
+improvement.save!
