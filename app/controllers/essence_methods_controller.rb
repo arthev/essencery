@@ -10,6 +10,8 @@ class EssenceMethodsController < ApplicationController
   # GET /essence_methods/1
   # GET /essence_methods/1.json
   def show
+	  @essence_graph = Node.where(essence_method: @essence_method)
+
   end
 
   # GET /essence_methods/new

@@ -27,7 +27,8 @@ ActiveRecord::Schema.define(version: 20180326105918) do
 
   create_table "nodes", force: :cascade do |t|
     t.string "name"
-    t.string "type"
+    t.string "icon"
+    t.string "category"
     t.integer "x"
     t.integer "y"
     t.integer "r"
