@@ -1,0 +1,2 @@
+module EssenceMethodsHelper
+end

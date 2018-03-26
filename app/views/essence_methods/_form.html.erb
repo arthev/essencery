@@ -1,0 +1,22 @@
+<%= form_with(model: essence_method, local: true) do |form| %>
+  <% if essence_method.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(essence_method.errors.count, "error") %> prohibited this essence_method from being saved:</h2>
+
+      <ul>
+      <% essence_method.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, id: :essence_method_name %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

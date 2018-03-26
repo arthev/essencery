@@ -10,13 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180325135557) do
+ActiveRecord::Schema.define(version: 20180326105918) do
 
   create_table "edges", force: :cascade do |t|
     t.integer "parent_id"
     t.integer "child_id"
     t.index ["child_id"], name: "index_edges_on_child_id"
     t.index ["parent_id"], name: "index_edges_on_parent_id"
+  end
+
+  create_table "essence_methods", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "nodes", force: :cascade do |t|
@@ -27,9 +33,8 @@ ActiveRecord::Schema.define(version: 20180325135557) do
     t.integer "r"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "parent_children", force: :cascade do |t|
+    t.integer "essence_method_id"
+    t.index ["essence_method_id"], name: "index_nodes_on_essence_method_id"
   end
 
 end

@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Essence Methods</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @essence_methods.each do |essence_method| %>
+      <tr>
+        <td><%= essence_method.name %></td>
+        <td><%= link_to 'Show', essence_method %></td>
+        <td><%= link_to 'Edit', edit_essence_method_path(essence_method) %></td>
+        <td><%= link_to 'Destroy', essence_method, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Essence Method', new_essence_method_path %>

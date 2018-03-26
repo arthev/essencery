@@ -1,4 +1,7 @@
 class Node < ApplicationRecord
+	belongs_to :essence_method
+
+
 	has_many :parent_edges,
 		class_name: 'Edge',
 		foreign_key: :child_id
