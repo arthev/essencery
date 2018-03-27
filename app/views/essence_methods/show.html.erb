@@ -1,11 +1,16 @@
+<%= javascript_tag do %>
+	var methodGraph = JSON.parse(<%= raw @essence_method.to_json %>);
+<% end %>
+<%= javascript_include_tag "grapher" %>
+
+
 <p id="notice"><%= notice %></p>
 
 <h1><%= @essence_method.name %></h1>
 
+<% image_tag "lel.png" %>
+<% image_tag "endeavour_alpha.png" %>
 
 
 
 
-<%= javascript_tag do %>
-	var methodGraph = <%= raw @essence_method.to_json %>
-<% end %>
