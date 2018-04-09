@@ -1,8 +1,6 @@
 <%= javascript_tag do %>
 	var methodGraph = JSON.parse(<%= raw @essence_method.to_json %>);
 <% end %>
-<%= javascript_include_tag "grapher" %>
-<%= stylesheet_link_tag "essence_methods" %>
 
 
 <p id="notice"><%= notice %></p>

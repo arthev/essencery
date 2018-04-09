@@ -1,4 +1,3 @@
-console.log(methodGraph);
 
 var CANVAS_PAGE_PERCENTAGE = 0.8; 
 var CIRCLE_OUTLINE_WIDTH = 2;
@@ -11,7 +10,17 @@ var COLOURS = {endeavour: "#3366E3",
 	black    : "#333333",
 	white    : "#FFFFFF"};
 
-var method_graph = methodGraph.method_graph;
+
+function save_graph(){
+	$.ajax({
+		url: window.location.href + ".json",
+		data: JSON.stringify(methodGraph),
+		type: "PATCH",
+		contentType: "application/json",
+		});
+}
+
+
 
 function graph_redraw(){
 	//Draw the parent->child edges
@@ -102,9 +111,14 @@ function initialize_graph(){
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 	( window.onresize = graph_resize )();
+	draw_loop_ID = window.setInterval(graph_redraw, 1000/30);
 }
 
 window.addEventListener("load", function(event) {
-	console.log("All resources finished loading!");
-	initialize_graph();
-});
+	if (document.getElementById("graph_canvas")){
+		console.log("All resources finished loading!");
+		console.log(methodGraph);
+		method_graph = methodGraph.method_graph;
+		initialize_graph();
+	}
+})

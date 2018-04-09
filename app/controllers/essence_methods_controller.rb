@@ -42,15 +42,19 @@ class EssenceMethodsController < ApplicationController
   # PATCH/PUT /essence_methods/1
   # PATCH/PUT /essence_methods/1.json
   def update
-    respond_to do |format|
-      if @essence_method.update(essence_method_params)
-        format.html { redirect_to @essence_method, notice: 'Essence method was successfully updated.' }
-        format.json { render :show, status: :ok, location: @essence_method }
-      else
-        format.html { render :edit }
-        format.json { render json: @essence_method.errors, status: :unprocessable_entity }
-      end
-    end
+	  p "Received the following:"
+	  p params["method_graph"]
+	  
+    #respond_to do |format|
+      #if @essence_method.update(essence_method_params)
+       # format.html { redirect_to @essence_method, notice: 'Essence method was successfully updated.' }
+       # format.json { render :show, status: :ok, location: @essence_method }
+      #else
+       # format.html { render :edit }
+       # format.json { render json: @essence_method.errors, status: :unprocessable_entity }
+      #end
+    #end
+	
   end
 
   # DELETE /essence_methods/1
