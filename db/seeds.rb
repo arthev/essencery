@@ -11,7 +11,7 @@ improvement = Node.create({name: "Improvement",
 						   element: "alpha",
 						   category: "endeavour",
 						   x: 50,
-						   y: 50,
+						   y: 100,
 						   r: 40,
 						   essence_method: AR})
 wayofworking = Node.create({name: "Way of Working",
