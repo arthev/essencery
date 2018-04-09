@@ -12,14 +12,14 @@ improvement = Node.create({name: "Improvement",
 						   category: "endeavour",
 						   x: 50,
 						   y: 50,
-						   r: 20,
+						   r: 40,
 						   essence_method: AR})
 wayofworking = Node.create({name: "Way of Working",
 							element: "alpha",
 							category: "endeavour",
-							x: 80, 
-							y: 80,
-							r: 20,
+							x: 280, 
+							y: 380,
+							r: 40,
 							essence_method: AR})
 wayofworking.parents.append improvement
 wayofworking.save!

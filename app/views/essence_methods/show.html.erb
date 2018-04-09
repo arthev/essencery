@@ -2,6 +2,7 @@
 	var methodGraph = JSON.parse(<%= raw @essence_method.to_json %>);
 <% end %>
 <%= javascript_include_tag "grapher" %>
+<%= stylesheet_link_tag "essence_methods" %>
 
 
 <p id="notice"><%= notice %></p>
@@ -9,17 +10,22 @@
 <h1><%= @essence_method.name %></h1>
 
 <div id="graph_canvas_container">
-	<canvas id="graph_canvas" style="border:1px solid #000000;"></canvas>
+	<canvas id="graph_canvas" style="border:1px solid #000000;">
+		<p>
+			This web app is a visual tool for making SEMAT Essence graphs, 
+			and relies on canvas functionality.
+		</p>
+	</canvas>
 </div>
 
 
 
 
 
-
-<%#= image_tag "lel.png" %>
-<%#= image_tag "endeavour_alpha.png" %>
-
+<div class="no_display">
+	<%= image_tag "lel.png", id: "lel" %>
+	<%= image_tag "endeavour_alpha.png", id: "endeavour_alpha" %>
+</div>
 
 
 
