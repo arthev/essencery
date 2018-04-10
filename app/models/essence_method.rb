@@ -24,4 +24,57 @@ class EssenceMethod < ApplicationRecord
 
 		{method_graph: node_info}.to_json
 	end
+
+	def update_model(received_data)
+		p "Here's the inside of update_model:"
+		p self.id
+		received_graph = received_data["method_graph"]
+
+		pseudo_id_transforms = {}
+		new_nodes = {}
+
+		#TODO: Add data sanity (incl. children-parent cohesivity?)
+
+
+
+		#Assuming data is sane
+		#Pass to "parse" ids
+		received_graph.keys.each {|nk|
+			numeralized = Integer(nk) rescue false
+			if numeralized
+				p "currently in numeralized"
+				p numeralized
+				#byebug
+				pseudo_id_transforms[nk] = numeralized
+			else
+				nn = Node.new()
+				nn.essence_method = self
+				nn.save!
+				pseudo_id_transforms[nk] = nn.id
+				new_nodes[nn.id] = nn
+			end
+		}
+		#Pass to actually update the real nodes
+		received_graph.keys.each {|nk|
+			rk = pseudo_id_transforms[nk]
+
+			rn = new_nodes[rk] || Node.find_by(id: rk) #real_node
+			pn = received_graph[nk] #pseudo_nose
+			
+			[:category, :element, :name, :r, :x, :y].each {|f|
+				rn[f] = pn[f]
+			}
+
+			keyified_children = pn[:children].map {|c| pseudo_id_transforms[c.to_s]}
+			p "KEYCHILDS"
+			p keyified_children
+			#keyified_parents = pn[:parents].map {|p| pseudo_id_transforms[p.to_s]}
+			des_map = keyified_children.map {|i| Node.find_by(id: i) }
+			p "des_map"
+			p des_map
+			rn.children = des_map
+			rn.save!
+		}
+		return :ok
+	end
 end

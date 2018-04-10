@@ -42,9 +42,9 @@ class EssenceMethodsController < ApplicationController
   # PATCH/PUT /essence_methods/1
   # PATCH/PUT /essence_methods/1.json
   def update
-	  p "Received the following:"
-	  p params["method_graph"]
-	  
+		hashed_params = params.to_unsafe_hash
+		result = @essence_method.update_model(hashed_params)
+		p result
     #respond_to do |format|
       #if @essence_method.update(essence_method_params)
        # format.html { redirect_to @essence_method, notice: 'Essence method was successfully updated.' }

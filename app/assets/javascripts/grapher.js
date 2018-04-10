@@ -18,6 +18,8 @@ function save_graph(){
 		type: "PATCH",
 		contentType: "application/json",
 		});
+
+	return "heh"
 }
 
 
