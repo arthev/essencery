@@ -7,3 +7,15 @@
 	visibility:hidden;
 }
 
+#graph_canvas
+{
+	position: absolute;
+	border: 1px solid #000000;
+}
+
+#graph_tools_section
+{
+	position: absolute;
+	border: 1px solid #FF0000;
+	left: 0px;
+}

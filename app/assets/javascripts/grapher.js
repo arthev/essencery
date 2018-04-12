@@ -1,5 +1,5 @@
 
-var CANVAS_PAGE_PERCENTAGE = 0.8; 
+var CANVAS_PAGE_PERCENTAGE = 0.9; 
 var CIRCLE_OUTLINE_WIDTH = 2;
 var EDGE_WIDTH = 2;
 var NAME_BUTT = 6;
@@ -108,14 +108,19 @@ function graph_redraw(){
 function graph_resize(){
 	graphcv.width = innerWidth*CANVAS_PAGE_PERCENTAGE;
 	graphcv.height = innerHeight*CANVAS_PAGE_PERCENTAGE;
-	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/2) + "px";
-	graphcv.style.position = "absolute";
+	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/1.25) + "px";
+
+	graphsb.style.width = graphcv.style.left;
+	graphsb.style.height = String(graphcv.height) + "px";
+
 	graph_redraw();
 }
 
 function initialize_graph(){
 	graphcv = document.getElementById("graph_canvas");
-	graphcnt = document.getElementById("graph_canvas_container");
+	graphcnt = document.getElementById("graph_canvas_section");
+	graphsb = document.getElementById("graph_tools_section");
+
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 	( window.onresize = graph_resize )();
