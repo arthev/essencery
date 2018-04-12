@@ -24,6 +24,12 @@ function save_graph(){
 
 
 
+
+
+
+
+
+
 function graph_redraw(){
 	//Draw the parent->child edges
 	ctx.strokeStyle = COLOURS.black;
