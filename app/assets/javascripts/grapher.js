@@ -11,6 +11,22 @@ var COLOURS = {endeavour: "#3366E3",
 	white    : "#FFFFFF"};
 
 
+var pseudoid = 0;
+function get_new_id(){
+	return String(pseudoid++);
+}
+
+
+
+function get_graphcv_left(){
+	return graphcv.getBoundingClientRect().left;
+}
+
+function get_graphcv_top(){
+	return graphcv.getBoundingClientRect().top;
+}
+
+
 function save_graph(){
 	$.ajax({
 		url: window.location.href + ".json",
@@ -25,7 +41,15 @@ function save_graph(){
 
 
 
-
+draw_tool_functions = {
+	null: function(){},	
+	"create_node": function (ev) {
+		var temp = "n" + get_new_id();
+		method_graph[temp] = {name: temp, element: ctool.element, category: ctool.category,
+		                      children: [], r: ctool.r, x: ev.clientX - get_graphcv_left(),
+							  y: ev.clientY - get_graphcv_top()};
+	} 
+}
 
 
 
@@ -41,8 +65,11 @@ function populate_onclicks(){
 			ctool.type = "create_node";
 		
 		};
-
 	}
+
+	graphcv.onclick = function(ev) {
+		draw_tool_functions[ctool.type](ev);
+	};
 
 }
 
@@ -124,7 +151,9 @@ function graph_redraw(){
 function graph_resize(){
 	graphcv.width = innerWidth*CANVAS_PAGE_PERCENTAGE;
 	graphcv.height = innerHeight*CANVAS_PAGE_PERCENTAGE;
+	//graphcv.style.left = String(get_graphcv_left()) + "px";
 	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/1.25) + "px";
+
 
 	graphsb.style.width = graphcv.style.left;
 	graphsb.style.height = String(graphcv.height) + "px";
@@ -139,7 +168,7 @@ function initialize_graph(){
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 
-	ctool = {element: null, category: null, type: null}
+	ctool = {element: null, category: null, type: null, r: 40}
 	populate_onclicks();
 
 
