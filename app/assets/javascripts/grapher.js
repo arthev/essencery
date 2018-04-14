@@ -29,6 +29,22 @@ function save_graph(){
 
 
 
+function populate_onclicks(){
+	var tools = document.querySelectorAll('[data-js="node_tool"]');
+	console.log(tools);
+	for (var i = 0; i < tools.length; i++){
+		tools[i].onclick = function () { 
+			//console.log(this.dataset.semat_category); 
+			//console.log(this.parentElement);
+			ctool.element = this.parentElement.dataset.semat_element;
+			ctool.category = this.dataset.semat_category;
+			ctool.type = "create_node";
+		
+		};
+
+	}
+
+}
 
 function graph_redraw(){
 	//Draw the parent->child edges
@@ -123,6 +139,11 @@ function initialize_graph(){
 
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
+
+	ctool = {element: null, category: null, type: null}
+	populate_onclicks();
+
+
 	( window.onresize = graph_resize )();
 	draw_loop_ID = window.setInterval(graph_redraw, 1000/30);
 }

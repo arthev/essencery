@@ -1,0 +1,5 @@
+<% ELEMENTS.each { |e| %>
+	<% CATEGORIES.each {|c| %>
+		<%= image_tag(c + "_" + e + ".png", id: c + "_" + e) %>
+	<% } %>
+<% } %>
