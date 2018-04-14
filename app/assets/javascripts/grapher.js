@@ -46,8 +46,10 @@ draw_tool_functions = {
 	"create_node": function (ev) {
 		var temp = "n" + get_new_id();
 		method_graph[temp] = {name: temp, element: ctool.element, category: ctool.category,
-		                      children: [], r: ctool.r, x: ev.clientX - get_graphcv_left(),
-							  y: ev.clientY - get_graphcv_top()};
+		                      children: [], parents: [], r: ctool.r, 
+							  x: Math.round(ev.clientX - get_graphcv_left()),
+							  y: Math.round(ev.clientY - get_graphcv_top())
+		};
 	} 
 }
 
