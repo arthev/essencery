@@ -1,0 +1,4 @@
+In no particular order:
+
+
+a) Make the server_side save_graph, i.e. essence_method.update_model clean up any empty nodes after the attempt to save data.
