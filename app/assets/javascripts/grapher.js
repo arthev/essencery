@@ -133,9 +133,8 @@ function graph_resize(){
 }
 
 function initialize_graph(){
-	graphcv = document.getElementById("graph_canvas");
-	graphcnt = document.getElementById("graph_canvas_section");
-	graphsb = document.getElementById("graph_tools_section");
+	graphcnt = document.querySelector('[data-js="graph_canvas_section"]');
+	graphsb = document.querySelector('[data-js="graph_tools_section"]');
 
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
@@ -149,7 +148,8 @@ function initialize_graph(){
 }
 
 window.addEventListener("load", function(event) {
-	if (document.getElementById("graph_canvas")){
+	graphcv = document.querySelector('[data-js="graph_canvas"]');
+	if (graphcv){
 		console.log("All resources finished loading!");
 		console.log(methodGraph);
 		method_graph = methodGraph.method_graph;

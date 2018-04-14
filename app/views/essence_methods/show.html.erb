@@ -7,8 +7,10 @@
 
 <h1><%= @essence_method.name %></h1>
 
-<section id="graph_canvas_section">
-	<canvas id="graph_canvas" data-js="graph_canvas">
+<section id="graph_canvas_section"
+	     data-js="graph_canvas_section">
+	<canvas id="graph_canvas" 
+		    data-js="graph_canvas">
 		<p>
 			This web app is a visual tool for making SEMAT Essence graphs, 
 			and relies on canvas functionality.
@@ -16,7 +18,8 @@
 	</canvas>
 </section>
 
-<section id="graph_tools_section">
+<section id="graph_tools_section"
+	     data-js="graph_tools_section">
 	<h4>Draw Tools</h4>
 
 	<%= render 'node_tools' %>
