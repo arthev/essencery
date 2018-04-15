@@ -1,8 +1,11 @@
 <% ELEMENTS.each { |e| %>
 	<div class="draw_tool_element_div" data-semat_element=<%= e %> >
 	<% CATEGORIES.each {|c| %>
-		<div class="draw_tool_category_div" data-semat_category=<%= c %> data-js="node_tool"
-		style='background: <%= COLOURS[c] %>;'></div>
+		<div class="draw_tool_category_div" data-semat_category=<%= c %> 
+		     data-js="node_tool" style="border: 1px solid <%= COLOURS[c] %>;">
+
+		 	<%= image_tag(c + "_" + e + ".png", class: "draw_tool_element_img") %>
+		 </div>
 	<% } %>
 	</div>
 <% } %>

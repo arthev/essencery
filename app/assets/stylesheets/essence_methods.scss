@@ -28,13 +28,21 @@
 	margin: 1px;
 }
 
-.draw_tool_category_div
-{
+.draw_tool_category_div {
 	float: left;
 	height: 100%;
-	width: 30%;
+	width: 28%;
 	margin: 1px;
+
+	.draw_tool_element_img {
+		position: relative;
+		width: 80%;
+		height: 80%;
+		left: 10%;
+		top: 10%;
+	}
 }
+
 
 
 
