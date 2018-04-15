@@ -65,7 +65,14 @@ function populate_onclicks(){
 			ctool.element = this.parentElement.dataset.semat_element;
 			ctool.category = this.dataset.semat_category;
 			ctool.type = "create_node";
-		
+
+			//Manipulate .last_selected_tool for user feedback re. selection
+			var cladd = "last_selected_tool";
+			var last = document.querySelector("." + cladd);
+			if (last) {
+				last.className = last.className.replace(" " + cladd, "");
+			}
+			this.className = this.className + " " + cladd;
 		};
 	}
 
