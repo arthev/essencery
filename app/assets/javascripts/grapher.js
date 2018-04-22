@@ -33,26 +33,50 @@ function save_graph(){
 		data: JSON.stringify(methodGraph),
 		type: "PATCH",
 		contentType: "application/json",
-		});
-
+	});
 	return "heh"
 }
 
 
-
+function node_renamer_gen(node_id){
+	return function(ev){
+		var node = method_graph[node_id];
+		console.log("didgeridoo!! : " + node_id);
+		console.log(ev);
+		if (ev.key == "Backspace") {
+			console.log("BACKSPACE MOTHERFUCKER");
+			node.name = node.name.slice(0, node.name.length - 1);
+		}
+		else if( RegExp("^[a-zA-Z0-9 ]$").test(ev.key) ){
+			node.name = node.name + ev.key;
+		}
+		else if( ev.key == "Enter" ){
+			ctool.func = null;
+			ctool.type = ctool.prev_type;
+		}
+	}
+}
 
 draw_tool_functions = {
 	null: function(){},	
 	"create_node": function (ev) {
 		var temp = "n" + get_new_id();
-		method_graph[temp] = {name: temp, element: ctool.element, category: ctool.category,
-		                      children: [], parents: [], r: ctool.r, 
-							  x: Math.round(ev.clientX - get_graphcv_left()),
-							  y: Math.round(ev.clientY - get_graphcv_top())
+		method_graph[temp] = {name: "", element: ctool.element, category: ctool.category,
+			children: [], parents: [], r: ctool.r, 
+			x: Math.round(ev.clientX - get_graphcv_left()),
+			y: Math.round(ev.clientY - get_graphcv_top())
 		};
+		ctool.prev_type = ctool.type;
+		ctool.type = "name_node";
+		ctool.func = node_renamer_gen(temp);
 	} 
 }
 
+function keydown_handler(ev){
+	if (ctool.type == "name_node") {
+		ctool.func(ev);
+	}
+}
 
 
 function populate_onclicks(){
@@ -75,14 +99,28 @@ function populate_onclicks(){
 			this.className = this.className + " " + cladd;
 		};
 	}
-
 	graphcv.onclick = function(ev) {
+		if (ctool.type == "name_node" && ctool.prev_type == "create_node"){
+			ctool.type = "create_node";
+			ctool.func = null;
+		}
 		draw_tool_functions[ctool.type](ev);
 	};
-
 }
 
+function populate_onkeydowns(){
+	window.onkeydown = keydown_handler;
+}
+
+
+
+
 function graph_redraw(){
+	//Draw the blank canvas first of all
+	ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
+	ctx.fillRect(0, 0, graphcv.width, graphcv.height);
+
+
 	//Draw the parent->child edges
 	ctx.strokeStyle = COLOURS.black;
 	ctx.lineWidth = EDGE_WIDTH; 
@@ -99,6 +137,8 @@ function graph_redraw(){
 			//And now for the arrows...
 			//TODO: Redo this part later to save on translate, rotate etc. by using direct trigonometry?
 			//Current solution lifted from chalks.
+			ctx.fillStyle = "rgb(0, 0, 0)";
+
 			var yComp = child.y - node.y;
 			var xComp = child.x - node.x;
 
@@ -177,8 +217,9 @@ function initialize_graph(){
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 
-	ctool = {element: null, category: null, type: null, r: 40}
+	ctool = {element: null, category: null, type: null, prev_type: null, func: null, r: 40}
 	populate_onclicks();
+	populate_onkeydowns();
 
 
 	( window.onresize = graph_resize )();
