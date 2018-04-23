@@ -407,7 +407,7 @@ function initialize_graph(){
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 
-	ctool = {element: null, category: null, type: null, prev_type: null, 
+	ctool = {element: null, category: null, type: null, prev_type: null, prev_element: null,
 			func: null, r: 40, mouseX: 0, mouseY: 0}
 	populate_onclicks();
 	populate_onkeydowns();
