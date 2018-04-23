@@ -112,7 +112,7 @@ function onclick_handler(ev) {
 		}
 		ctool.func = null;
 	}
-	else if (ctool.type == "relation_maker"){
+	else if (ctool.type == "relation_maker" || ctool.type == "move_node"){
 		return;
 	}
 	draw_tool_functions[ctool.type](ev);
@@ -121,9 +121,10 @@ function onclick_handler(ev) {
 
 
 function onmousedown_handler(ev){
-	if (ctool.type == "relation_maker"){
-		var coords = get_graph_coords(ev.clientX, ev.clientY);
-		var found_node = get_node_by_coords(coords);
+	var coords = get_graph_coords(ev.clientX, ev.clientY);
+	var found_node = get_node_by_coords(coords);
+
+	if (ctool.type == "relation_maker" || ctool.type == "move_node"){
 		if (found_node){
 			ctool.element = found_node;
 		}
@@ -145,12 +146,20 @@ function onmouseup_handler(ev){
 		   }
 		ctool.element = null;
 	}
+	else if(ctool.type == "move_node"){
+		ctool.element = null;
+	}
 }
 
 function onmousemove_handler(ev){
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
 	ctool.mouseX = coords.x;
 	ctool.mouseY = coords.y;
+	
+	if (ctool.type == "move_node" && ctool.element){
+		ctool.element.x = ctool.mouseX;
+		ctool.element.y = ctool.mouseY;
+	}
 }
 
 
