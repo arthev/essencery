@@ -6,5 +6,5 @@ COLOURS = {"customer" => "#3B9F6B",
 		   "endeavour" => "#3366E3"}.freeze
 
 OP_TOOLS = {"relation_maker" => "relation_symbol.png",
-			"rename_selector" => "rename_symbol.png"
+			"name_node" => "rename_symbol.png"
 }

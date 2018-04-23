@@ -88,7 +88,7 @@ draw_tool_functions = {
 		ctool.type = "name_node";
 		ctool.func = node_renamer_gen(temp);
 	},
-	"rename_selector": function (ev) {
+	"name_node": function (ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
@@ -100,14 +100,16 @@ draw_tool_functions = {
 }
 
 function keydown_handler(ev){
-	if (ctool.type == "name_node") {
+	if (ctool.type == "name_node" && ctool.func) {
 		ctool.func(ev);
 	}
 }
 
 function onclick_handler(ev) {
-	if (ctool.type == "name_node" && ctool.prev_type == "create_node"){
-		ctool.type = "create_node";
+	if (ctool.type == "name_node"){
+		if(ctool.prev_type == "create_node"){
+			ctool.type = "create_node";
+		}
 		ctool.func = null;
 	}
 	else if (ctool.type == "relation_maker"){
