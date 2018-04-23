@@ -31,6 +31,21 @@ function get_graph_coords(xi, yi){
 	}
 }
 
+function get_node_by_coords(coords){
+	var potential_nodes = Object.values(method_graph).filter(
+			function(node){ 
+				return Math.abs(coords.x - node.x) <= node.r && 
+		Math.abs(coords.y - node.y) <= node.r
+			}
+			)
+	if(potential_nodes.length == 0){
+		return null;
+	}
+	return potential_nodes.reduce( function(prev, curr){
+		return prev.r <= curr.r ? prev : curr;
+	}
+	);
+}
 
 function save_graph(){
 	$.ajax({
@@ -72,7 +87,16 @@ draw_tool_functions = {
 		ctool.prev_type = ctool.type;
 		ctool.type = "name_node";
 		ctool.func = node_renamer_gen(temp);
-	} 
+	},
+	"rename_selector": function (ev) {
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var found_node = get_node_by_coords(coords);
+		if (found_node){
+			ctool.prev_type = ctool.type;
+			ctool.type = "name_node";
+			ctool.func = node_renamer_gen(found_node.id);
+		}
+	}
 }
 
 function keydown_handler(ev){
@@ -92,21 +116,7 @@ function onclick_handler(ev) {
 	draw_tool_functions[ctool.type](ev);
 }
 
-function get_node_by_coords(coords){
-	var potential_nodes = Object.values(method_graph).filter(
-			function(node){ 
-				return Math.abs(coords.x - node.x) <= node.r && 
-		Math.abs(coords.y - node.y) <= node.r
-			}
-			)
-	if(potential_nodes.length == 0){
-		return null;
-	}
-	return potential_nodes.reduce( function(prev, curr){
-		return prev.r <= curr.r ? prev : curr;
-	}
-	);
-}
+
 
 function onmousedown_handler(ev){
 	if (ctool.type == "relation_maker"){
@@ -332,7 +342,6 @@ function graph_resize(){
 	graphcv.height = innerHeight*CANVAS_PAGE_PERCENTAGE;
 	//graphcv.style.left = String(get_graphcv_left()) + "px";
 	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/1.25) + "px";
-
 
 	graphsb.style.width = graphcv.style.left;
 	graphsb.style.height = String(graphcv.height) + "px";

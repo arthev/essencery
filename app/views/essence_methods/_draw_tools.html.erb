@@ -9,6 +9,18 @@
 	<% } %>
 	</div>
 <% } %>
-<div class="draw_tool_operation_div" data-js="operation_tool" data-tool_type="relation_maker">
-	<%= image_tag("relation_symbol.png", class: "draw_tool_operation_img") %>
-</div>
+
+<% OP_TOOLS.keys.each { |t| %>
+	<div class="draw_tool_operation_div"
+	     data-js="operation_tool"
+	     data-tool_type=<%= t %> >
+		 <% p OP_TOOLS %>
+		 <% p t %>
+		 <% p OP_TOOLS[t] %>
+		<%= image_tag(OP_TOOLS[t], 
+		        class: "draw_tool_operation_img")%>
+	</div>
+<% } %>
+
+
+
