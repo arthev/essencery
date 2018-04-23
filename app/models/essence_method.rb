@@ -30,12 +30,25 @@ class EssenceMethod < ApplicationRecord
 		p "Here's the inside of update_model:"
 		p self.id
 		received_graph = received_data["method_graph"]
+		deleted_nodes = received_data["deleted_nodes"]
 
 		pseudo_id_transforms = {}
 		new_nodes = {}
 
 		#TODO: Add data sanity (incl. children-parent cohesivity?)
 
+
+
+		p "PAY ATTENTION"
+		p deleted_nodes
+		deleted_nodes.each { |nid| 
+			numeralized = Integer(nid) rescue false
+			if numeralized
+				Node.find_by(id: nid).destroy
+			else
+				raise "Bad data received in deleted_nodes" + deleted_nodes.to_s
+			end
+		}
 
 
 		#Assuming data is sane

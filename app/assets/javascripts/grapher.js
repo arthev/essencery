@@ -96,6 +96,36 @@ draw_tool_functions = {
 			ctool.type = "name_node";
 			ctool.func = node_renamer_gen(found_node.id);
 		}
+	},
+	"delete_node": function (ev) {
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var found_node = get_node_by_coords(coords);
+		if (found_node){
+			console.log(found_node);
+			//First detach all parents and children
+			for(var i = 0; i < found_node.children.length; i++){
+				var parent_array = method_graph[found_node.children[i]].parents;
+				var index = parent_array.indexOf(found_node.id);
+				if(index !== -1){
+					parent_array.splice(index, 1);
+				}
+			}
+			for(var i = 0; i < found_node.parents.length; i++){
+				var children_array = method_graph[found_node.parents[i]].children;
+				var index = children_array.indexOf(found_node.id);
+				if(index !== -1){
+					children_array.splice(index, 1);
+				}
+			}
+			
+			//Then update methodGraph.deleted_nodes if found_node.id is numerical AKA in DB
+			if(Number.isInteger(found_node.id)){
+				methodGraph.deleted_nodes.push(found_node.id);
+			}
+
+			//Then remove the node itself
+			delete method_graph[found_node.id];
+		}
 	}
 }
 
@@ -143,6 +173,7 @@ function onmouseup_handler(ev){
 				(ctool.element.children.indexOf(found_node.id) < 0) 
 		   ){
 			   ctool.element.children.push(found_node.id);
+			   found_node.parents.push(ctool.element.id);
 		   }
 		ctool.element = null;
 	}
@@ -386,6 +417,7 @@ window.addEventListener("load", function(event) {
 	if (graphcv){
 		console.log("All resources finished loading!");
 		console.log(methodGraph);
+		methodGraph["deleted_nodes"] = [];
 		method_graph = methodGraph.method_graph;
 		initialize_graph();
 	}
