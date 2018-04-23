@@ -211,7 +211,7 @@ function graph_redraw(){
 		ctx.lineTo(end.x, end.y);
 		ctx.stroke();
 
-		//And now for the arrows...
+		//And now the arrow!
 		//TODO: Redo this part later to save on translate, rotate etc. by using direct trigonometry?
 		//Current solution lifted from chalks.
 
