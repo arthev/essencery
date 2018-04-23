@@ -155,9 +155,6 @@ function onmousemove_handler(ev){
 
 
 
-
-
-
 function populate_onclicks(){
 	function generate_draw_tooler_function(f){
 		return function(){
@@ -193,6 +190,10 @@ function populate_onclicks(){
 		op_tools[i].onclick = generate_draw_tooler_function(
 				function (tool) {
 					ctool.type = tool.dataset.tool_type;
+					//TODO:
+					//The overriding of prev_type for op_tools might be an ugly hack, 
+					//or it might be working decent, will find out later.
+					ctool.prev_type = ctool.type;
 					ctool.element = null;
 
 				}
