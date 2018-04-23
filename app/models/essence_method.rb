@@ -12,6 +12,7 @@ class EssenceMethod < ApplicationRecord
 			node_info[ n.id ] =
 				{
 				name: n.name,
+				id: n.id,
 				element: n.element,
 				category: n.category,
 				x: n.x,

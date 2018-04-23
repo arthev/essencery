@@ -25,14 +25,19 @@ function get_graphcv_left(){
 function get_graphcv_top(){
 	return graphcv.getBoundingClientRect().top;
 }
+function get_graph_coords(xi, yi){
+	return {x: Math.round(xi - get_graphcv_left()),
+		y: Math.round(yi - get_graphcv_top())
+	}
+}
 
 
 function save_graph(){
 	$.ajax({
 		url: window.location.href + ".json",
-		data: JSON.stringify(methodGraph),
-		type: "PATCH",
-		contentType: "application/json",
+	data: JSON.stringify(methodGraph),
+	type: "PATCH",
+	contentType: "application/json",
 	});
 	return "heh"
 }
@@ -58,10 +63,11 @@ draw_tool_functions = {
 	null: function(){},	
 	"create_node": function (ev) {
 		var temp = "n" + get_new_id();
-		method_graph[temp] = {name: "", element: ctool.element, category: ctool.category,
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		method_graph[temp] = {name: "", id: temp, element: ctool.element, category: ctool.category,
 			children: [], parents: [], r: ctool.r, 
-			x: Math.round(ev.clientX - get_graphcv_left()),
-			y: Math.round(ev.clientY - get_graphcv_top())
+			x: coords.x,
+			y: coords.y
 		};
 		ctool.prev_type = ctool.type;
 		ctool.type = "name_node";
@@ -74,6 +80,69 @@ function keydown_handler(ev){
 		ctool.func(ev);
 	}
 }
+
+function onclick_handler(ev) {
+	if (ctool.type == "name_node" && ctool.prev_type == "create_node"){
+		ctool.type = "create_node";
+		ctool.func = null;
+	}
+	else if (ctool.type == "relation_maker"){
+		return;
+	}
+	draw_tool_functions[ctool.type](ev);
+}
+
+function get_node_by_coords(coords){
+	var potential_nodes = Object.values(method_graph).filter(
+			function(node){ 
+				return Math.abs(coords.x - node.x) <= node.r && 
+		Math.abs(coords.y - node.y) <= node.r
+			}
+			)
+	if(potential_nodes.length == 0){
+		return null;
+	}
+	return potential_nodes.reduce( function(prev, curr){
+		return prev.r <= curr.r ? prev : curr;
+	}
+	);
+}
+
+function onmousedown_handler(ev){
+	if (ctool.type == "relation_maker"){
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var found_node = get_node_by_coords(coords);
+		if (found_node){
+			ctool.element = found_node;
+		}
+		else {
+			ctool.element = null;
+		}
+	}
+}
+
+function onmouseup_handler(ev){
+	if (ctool.type == "relation_maker"){
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var found_node = get_node_by_coords(coords);
+		if ( (found_node && ctool.element) &&
+				(found_node.id != ctool.element.id) &&
+				(ctool.element.children.indexOf(found_node.id) < 0) 
+		   ){
+			   ctool.element.children.push(found_node.id);
+		   }
+		ctool.element = null;
+	}
+}
+
+function onmousemove_handler(ev){
+	var coords = get_graph_coords(ev.clientX, ev.clientY);
+	ctool.mouseX = coords.x;
+	ctool.mouseY = coords.y;
+}
+
+
+
 
 
 
@@ -90,7 +159,7 @@ function populate_onclicks(){
 				last.className = last.className.replace(" " + cladd, "");
 			}
 			this.className = this.className + " " + cladd;
-		}
+		};
 	}
 
 	var tools = document.querySelectorAll('[data-js="node_tool"]');
@@ -101,26 +170,70 @@ function populate_onclicks(){
 					ctool.category = tool.dataset.semat_category;
 					ctool.type = "create_node";
 				}
-			);
-
+				);
 	}
-	graphcv.onclick = function(ev) {
-		if (ctool.type == "name_node" && ctool.prev_type == "create_node"){
-			ctool.type = "create_node";
-			ctool.func = null;
-		}
-		draw_tool_functions[ctool.type](ev);
-	};
+
+	graphcv.onclick = onclick_handler;
+
+	var op_tools = document.querySelectorAll('[data-js="operation_tool"]');
+	console.log(op_tools);
+	for (var i = 0; i < op_tools.length; i++){
+		op_tools[i].onclick = generate_draw_tooler_function(
+				function (tool) {
+					ctool.type = tool.dataset.tool_type;
+					ctool.element = null;
+
+				}
+				);
+	}
 }
 
 function populate_onkeydowns(){
 	window.onkeydown = keydown_handler;
+}
+function populate_onmousedowns(){
+	graphcv.onmousedown = onmousedown_handler;
+}
+function populate_onmouseups(){
+	graphcv.onmouseup = onmouseup_handler;
+}
+function populate_onmousemove(){
+	graphcv.onmousemove = onmousemove_handler;
 }
 
 
 
 
 function graph_redraw(){
+	function draw_arrow(start, end){
+		ctx.beginPath();
+		ctx.moveTo(start.x, start.y);
+		ctx.lineTo(end.x, end.y);
+		ctx.stroke();
+
+		//And now for the arrows...
+		//TODO: Redo this part later to save on translate, rotate etc. by using direct trigonometry?
+		//Current solution lifted from chalks.
+
+		var yComp = end.y - start.y;
+		var xComp = end.x - start.x;
+
+		var angle = Math.atan2( yComp, xComp );
+
+		ctx.save();
+		ctx.beginPath();
+		ctx.translate( end.x, end.y );
+		ctx.rotate( angle + 90*Math.PI/180 );
+		ctx.moveTo( 0, 0 );
+		ctx.lineTo( 8, 12 );
+		ctx.lineTo( -8, 12 );
+		ctx.closePath();
+		ctx.restore();
+		ctx.stroke();
+		ctx.fill();
+	}
+
+
 	//Draw the blank canvas first of all
 	ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
 	ctx.fillRect(0, 0, graphcv.width, graphcv.height);
@@ -134,15 +247,8 @@ function graph_redraw(){
 		for (var child_id in node.children){
 			var child = method_graph[node.children[child_id]];
 
-			ctx.beginPath();
-			ctx.moveTo(node.x, node.y);
-			ctx.lineTo(child.x, child.y);
-			ctx.stroke();
-
-			//And now for the arrows...
-			//TODO: Redo this part later to save on translate, rotate etc. by using direct trigonometry?
-			//Current solution lifted from chalks.
-			ctx.fillStyle = "rgb(0, 0, 0)";
+			ctx.fillStyle = "rgb(40, 40, 40)";
+			ctx.strokeStyle = "rgb(40, 40, 40)";
 
 			var yComp = child.y - node.y;
 			var xComp = child.x - node.x;
@@ -153,17 +259,10 @@ function graph_redraw(){
 			var yPoint = child.y - ( EDGE_WIDTH + child.r ) * Math.sin( angle );
 			var xPoint = child.x - ( EDGE_WIDTH + child.r ) * Math.cos( angle );
 
-			ctx.save();
-			ctx.beginPath();
-			ctx.translate( xPoint, yPoint );
-			ctx.rotate( angle + 90*Math.PI/180 );
-			ctx.moveTo( 0, 0 );
-			ctx.lineTo( 8, 12 );
-			ctx.lineTo( -8, 12 );
-			ctx.closePath();
-			ctx.restore();
-			ctx.stroke();
-			ctx.fill();
+			var start = {x: node.x, y: node.y};
+			var end = {x: xPoint, y: yPoint};
+
+			draw_arrow(start, end);
 		}
 	}
 
@@ -201,11 +300,30 @@ function graph_redraw(){
 		ctx.fillText(node.name, node.x - width/2, node.y - 1.2*node.r);
 	}
 
-	//Draw a box to draw user attention if currently renaming a node
-	if (ctool.type == "name_node"){
-		//TODO
+	/*Draw a box to draw user attention if currently renaming a node?
+	  if (ctool.type == "name_node"){
+	//TODO
 
 
+	}*/
+
+	if (ctool.type == "relation_maker" && ctool.element){
+		ctx.fyllStyle = "rgb(40, 40, 40)";
+		ctx.strokeStyle = "rgb(40, 40, 40)";
+
+		var node = ctool.element;
+		var end = {x: ctool.mouseX, y: ctool.mouseY};
+
+		var yComp = end.y - node.y;
+		var xComp = end.x - node.x;
+
+		var angle = Math.atan2( yComp, xComp );
+		// Line starting right at the edge of the node, hehe
+		var yPoint = node.y + ( EDGE_WIDTH + node.r ) * Math.sin( angle );
+		var xPoint = node.x + ( EDGE_WIDTH + node.r ) * Math.cos( angle );
+
+		var start = {x: xPoint, y: yPoint};
+		draw_arrow(start, end);
 	}
 }
 
@@ -229,9 +347,13 @@ function initialize_graph(){
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
 
-	ctool = {element: null, category: null, type: null, prev_type: null, func: null, r: 40}
+	ctool = {element: null, category: null, type: null, prev_type: null, 
+			func: null, r: 40, mouseX: 0, mouseY: 0}
 	populate_onclicks();
 	populate_onkeydowns();
+	populate_onmousedowns();
+	populate_onmouseups();
+	populate_onmousemove();
 
 
 	( window.onresize = graph_resize )();
