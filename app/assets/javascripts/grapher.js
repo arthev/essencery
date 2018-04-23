@@ -76,15 +76,12 @@ function keydown_handler(ev){
 }
 
 
+
 function populate_onclicks(){
-	var tools = document.querySelectorAll('[data-js="node_tool"]');
-	for (var i = 0; i < tools.length; i++){
-		tools[i].onclick = function () { 
-			//console.log(this.dataset.semat_category); 
-			//console.log(this.parentElement);
-			ctool.element = this.parentElement.dataset.semat_element;
-			ctool.category = this.dataset.semat_category;
-			ctool.type = "create_node";
+	function generate_draw_tooler_function(f){
+		return function(){
+			//Call "main" on_click function spoofing this->tool
+			f(this);
 
 			//Manipulate .last_selected_tool for user feedback re. selection
 			var cladd = "last_selected_tool";
@@ -93,7 +90,19 @@ function populate_onclicks(){
 				last.className = last.className.replace(" " + cladd, "");
 			}
 			this.className = this.className + " " + cladd;
-		};
+		}
+	}
+
+	var tools = document.querySelectorAll('[data-js="node_tool"]');
+	for (var i = 0; i < tools.length; i++){
+		tools[i].onclick = generate_draw_tooler_function( 
+				function (tool) { 
+					ctool.element = tool.parentElement.dataset.semat_element;
+					ctool.category = tool.dataset.semat_category;
+					ctool.type = "create_node";
+				}
+			);
+
 	}
 	graphcv.onclick = function(ev) {
 		if (ctool.type == "name_node" && ctool.prev_type == "create_node"){
