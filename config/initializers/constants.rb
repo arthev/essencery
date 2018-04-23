@@ -14,3 +14,7 @@ OP_TOOLS = {"relation_maker" => {image: "relation_symbol.png",
 			"delete_node" => {image: "trash_symbol.png",
 					          title: "Delete a node."}
 }
+
+FILE_TOOLS = {"save_method" => {image: "save_symbol.png",
+								title: "Save the method to the cloud."}
+}

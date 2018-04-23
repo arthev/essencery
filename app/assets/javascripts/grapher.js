@@ -393,9 +393,15 @@ function graph_resize(){
 	graphcv.height = innerHeight*CANVAS_PAGE_PERCENTAGE;
 	//graphcv.style.left = String(get_graphcv_left()) + "px";
 	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/1.25) + "px";
+	graphcv.style.top = String(innerHeight*(1.0 - CANVAS_PAGE_PERCENTAGE)/2.0) + "px";
 
 	graphsb.style.width = graphcv.style.left;
 	graphsb.style.height = String(graphcv.height) + "px";
+	graphsb.style.top = graphcv.style.top;
+
+	graphtop.style.height = graphcv.style.top;
+	//TODO: Fix this bullshit lol
+	graphtop.style.width = String(CANVAS_PAGE_PERCENTAGE * 108.9) + "%";
 
 	graph_redraw();
 }
@@ -403,6 +409,7 @@ function graph_resize(){
 function initialize_graph(){
 	graphcnt = document.querySelector('[data-js="graph_canvas_section"]');
 	graphsb = document.querySelector('[data-js="graph_tools_section"]');
+	graphtop = document.querySelector('[data-js="graph_file_section"]');
 
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};

@@ -3,9 +3,13 @@
 <% end %>
 
 
-<p id="notice"><%= notice %></p>
+<section id="graph_file_section"
+		data-js="graph_file_section">
+	<h1><%= @essence_method.name %></h1>
 
-<h1><%= @essence_method.name %></h1>
+	<%= render 'file_tools' %>
+
+</section>
 
 <section id="graph_canvas_section"
 	     data-js="graph_canvas_section">
