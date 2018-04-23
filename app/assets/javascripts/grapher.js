@@ -41,10 +41,7 @@ function save_graph(){
 function node_renamer_gen(node_id){
 	return function(ev){
 		var node = method_graph[node_id];
-		console.log("didgeridoo!! : " + node_id);
-		console.log(ev);
 		if (ev.key == "Backspace") {
-			console.log("BACKSPACE MOTHERFUCKER");
 			node.name = node.name.slice(0, node.name.length - 1);
 		}
 		else if( RegExp("^[a-zA-Z0-9 ]$").test(ev.key) ){
@@ -81,7 +78,6 @@ function keydown_handler(ev){
 
 function populate_onclicks(){
 	var tools = document.querySelectorAll('[data-js="node_tool"]');
-	console.log(tools);
 	for (var i = 0; i < tools.length; i++){
 		tools[i].onclick = function () { 
 			//console.log(this.dataset.semat_category); 
@@ -194,6 +190,13 @@ function graph_redraw(){
 				18);
 		ctx.fillStyle = COLOURS.black;
 		ctx.fillText(node.name, node.x - width/2, node.y - 1.2*node.r);
+	}
+
+	//Draw a box to draw user attention if currently renaming a node
+	if (ctool.type == "name_node"){
+		//TODO
+
+
 	}
 }
 
