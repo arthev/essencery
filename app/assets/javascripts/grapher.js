@@ -85,6 +85,7 @@ draw_tool_functions = {
 			y: coords.y
 		};
 		ctool.prev_type = ctool.type;
+		ctool.prev_element = ctool.element;
 		ctool.type = "name_node";
 		ctool.element = method_graph[temp];
 		ctool.func = node_renamer_gen(temp);
@@ -94,6 +95,7 @@ draw_tool_functions = {
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
 			ctool.prev_type = ctool.type;
+			ctool.prev_element = ctool.element;
 			ctool.element = found_node;
 			console.log(ctool.element);
 			ctool.type = "name_node";
@@ -141,7 +143,8 @@ function keydown_handler(ev){
 function onclick_handler(ev) {
 	if (ctool.type == "name_node"){
 		if(ctool.prev_type == "create_node"){
-			ctool.type = "create_node";
+			ctool.type = ctool.prev_type;
+			ctool.element = ctool.prev_element;
 		}
 		ctool.func = null;
 	}
