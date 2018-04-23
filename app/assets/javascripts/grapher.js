@@ -86,6 +86,7 @@ draw_tool_functions = {
 		};
 		ctool.prev_type = ctool.type;
 		ctool.type = "name_node";
+		ctool.element = method_graph[temp];
 		ctool.func = node_renamer_gen(temp);
 	},
 	"name_node": function (ev) {
@@ -93,6 +94,8 @@ draw_tool_functions = {
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
 			ctool.prev_type = ctool.type;
+			ctool.element = found_node;
+			console.log(ctool.element);
 			ctool.type = "name_node";
 			ctool.func = node_renamer_gen(found_node.id);
 		}
@@ -351,14 +354,16 @@ function graph_redraw(){
 				18);
 		ctx.fillStyle = COLOURS.black;
 		ctx.fillText(node.name, node.x - width/2, node.y - 1.2*node.r);
+
+		//And a box around the input for active naming...
+		if (ctool.type == "name_node" && ctool.func && ctool.element == node){
+			ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
+			ctx.strokeRect(node.x - width/2 - NAME_BUTT/2,
+					node.y - 1.2*node.r - 14,
+					width + NAME_BUTT,
+					18);
+		}
 	}
-
-	/*Draw a box to draw user attention if currently renaming a node?
-	  if (ctool.type == "name_node"){
-	//TODO
-
-
-	}*/
 
 	if (ctool.type == "relation_maker" && ctool.element){
 		ctx.fyllStyle = "rgb(40, 40, 40)";
