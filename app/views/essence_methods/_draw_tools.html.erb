@@ -23,5 +23,14 @@
 	</div>
 <% } %>
 
-
+<% FILE_TOOLS.keys.each { |t| %>
+	<div class="draw_tool_operation_div"
+		 data-js="file_tool"
+		 data-tool_type=<%= t %>
+	     title='<%= FILE_TOOLS[t][:title] %>'
+		 >
+		 <%= image_tag(FILE_TOOLS[t][:image],
+		 		class: "draw_tool_operation_img")%>
+	</div>
+<% } %>
 

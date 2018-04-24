@@ -245,6 +245,14 @@ function populate_onclicks(){
 				}
 				);
 	}
+
+	var saver = document.querySelector('[data-js="file_tool"]');
+	saver.onclick = generate_draw_tooler_function(
+			function (tool) {
+				save_graph();
+				window.location.href = "./";
+			}
+			);
 }
 
 function populate_onkeydowns(){
