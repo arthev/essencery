@@ -16,5 +16,13 @@ OP_TOOLS = {"relation_maker" => {image: "relation_symbol.png",
 }
 
 FILE_TOOLS = {"save_method" => {image: "save_symbol.png",
-								title: "Save the method to the cloud."}
+								title: "Save the method to the cloud."},
+			 "new_method" =>  {image: "new_symbol.png",
+					            title: "Make a new method."},
+			 "undo_action" => {image: "undo_symbol.png",
+					            title: "Undo the last action."},
+			 "redo_action" => {image: "redo_symbol.png",
+					            title: "Redo the last action (if undone)."},
+			 "index_method" => {image: "index_symbol.png",
+					            title: "Return to the index of the methods."}
 }

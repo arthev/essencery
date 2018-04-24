@@ -1,7 +1,14 @@
 // Place all the styles related to the EssenceMethods controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-html, body {
+.unselectable
+{
+	-moz-user-select:none;
+	-webkit-user-select:none;
+}
+
+.graph_app 
+{
 	overflow: hidden;
 }
 
@@ -29,6 +36,20 @@ html, body {
 	left: 0px;
 	top: 0px;
 	border: 2px solid #EE00EE;
+}
+
+#branding_section
+{
+	position:absolute;
+	left: 0px;
+	top: 0px;
+	border: 2px solid #11AA11;
+
+	.arthur_img
+	{
+		height: 100%;
+		width: 100%;
+	}
 }
 
 
@@ -72,9 +93,9 @@ html, body {
 
 .file_tool_div {
 	float: left;
-	height: 95%;
+	height: 85%;
 	width: 10%;
-	margin: 2px;
+	margin: 4px;
 	border: 1px solid purple;
 
 	.file_tool_img {

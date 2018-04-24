@@ -3,7 +3,7 @@
 	<% CATEGORIES.each {|c| %>
 		<div class="draw_tool_category_div" data-semat_category=<%= c %> 
 			data-js="node_tool" style="border: 1px solid <%= COLOURS[c] %>;"
-			title='<%= "Create nodes of " + e + " type, in the " + c + " category." %>'
+			title='<%= "Create " + c + " " + e + " nodes!" %>'
 			>
 
 		 	<%= image_tag(c + "_" + e + ".png", class: "draw_tool_element_img") %>
@@ -20,17 +20,6 @@
 	 >
 		<%= image_tag(OP_TOOLS[t][:image], 
 		        class: "draw_tool_operation_img")%>
-	</div>
-<% } %>
-
-<% FILE_TOOLS.keys.each { |t| %>
-	<div class="draw_tool_operation_div"
-		 data-js="file_tool"
-		 data-tool_type=<%= t %>
-	     title='<%= FILE_TOOLS[t][:title] %>'
-		 >
-		 <%= image_tag(FILE_TOOLS[t][:image],
-		 		class: "draw_tool_operation_img")%>
 	</div>
 <% } %>
 

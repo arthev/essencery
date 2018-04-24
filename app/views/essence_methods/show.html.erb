@@ -1,14 +1,21 @@
 <%= javascript_tag do %>
 	var methodGraph = JSON.parse(<%= raw @essence_method.to_json %>);
+	var methodName = "<%= raw @essence_method.name %>";
 <% end %>
 
+<body class="unselectable graph_app">
+
+
+
+<section id="branding_section"
+		 data-js="branding_section">
+		<%= image_tag("arthur.png", class: "arthur_img") %>
+</section>
 
 <section id="graph_file_section"
-		data-js="graph_file_section">
-	<h1><%= @essence_method.name %></h1>
+         data-js="graph_file_section">
 
 	<%= render 'file_tools' %>
-
 </section>
 
 <section id="graph_canvas_section"
@@ -38,3 +45,9 @@
 
 
 
+
+
+
+
+
+</body>

@@ -1,6 +1,6 @@
 
 var BORDER_THICKNESS = 3;
-var CANVAS_WIDTH_PERCENTAGE = 0.8;
+var CANVAS_WIDTH_PERCENTAGE = 0.91;
 var CANVAS_HEIGHT_PERCENTAGE = 0.9;
 var CIRCLE_OUTLINE_WIDTH = 2;
 var EDGE_WIDTH = 2;
@@ -248,13 +248,30 @@ function populate_onclicks(){
 				);
 	}
 
-	var saver = document.querySelector('[data-js="file_tool"]');
-	saver.onclick = generate_draw_tooler_function(
-			function (tool) {
+
+	function file_onclicker(identificator, func){
+		var filer = document.querySelector(identificator);
+		filer.onclick = generate_draw_tooler_function(
+				function (tool) {
+					func();
+				}
+				);
+	}
+
+	file_onclicker('[data-js="save_method"]',
+			function(){
 				save_graph();
 				window.location.href = "./";
-			}
-			);
+			});
+	file_onclicker('[data-js="new_method"]',
+			function(){
+				window.location.href = "./new";
+			});
+	file_onclicker('[data-js="index_method"]',
+			function(){
+				window.location.href = "./";
+			});
+
 }
 
 function populate_onkeydowns(){
@@ -378,6 +395,18 @@ function graph_redraw(){
 		}
 	}
 
+	//Draw the name of the method
+	ctx.font = "32px serif";
+	var width = ctx.measureText(methodName).width;
+	ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+	ctx.fillRect(4, 4, width, 36);
+	ctx.fillStyle = COLOURS.black;
+	ctx.fillText(methodName, 4, 32);
+
+
+
+
+
 	if (ctool.type == "relation_maker" && ctool.element){
 		ctx.fyllStyle = "rgb(40, 40, 40)";
 		ctx.strokeStyle = "rgb(40, 40, 40)";
@@ -399,9 +428,9 @@ function graph_redraw(){
 }
 
 function graph_resize(){
+
 	graphcv.width = innerWidth*CANVAS_WIDTH_PERCENTAGE - BORDER_THICKNESS;
 	graphcv.height = innerHeight*CANVAS_HEIGHT_PERCENTAGE;
-	//graphcv.style.left = String(get_graphcv_left()) + "px";
 	graphcv.style.left = String(innerWidth*(1.0-CANVAS_WIDTH_PERCENTAGE)) + "px";
 	graphcv.style.top = String(innerHeight*(1.0-CANVAS_HEIGHT_PERCENTAGE) - BORDER_THICKNESS) + "px";
 
@@ -409,9 +438,12 @@ function graph_resize(){
 	graphsb.style.height = String(graphcv.height) + "px";
 	graphsb.style.top = graphcv.style.top;
 
+	graphfis.style.height = graphcv.style.top;
+	graphfis.style.width = String(graphcv.width - 1) + "px";
+	graphfis.style.left = graphcv.style.left;
 
-	graphtop.style.height = graphcv.style.top;
-	graphtop.style.width = String(innerWidth - BORDER_THICKNESS - 1) + "px";
+	brandsct.style.width = graphsb.style.width;
+	brandsct.style.height = graphfis.style.height;
 
 	graph_redraw();
 }
@@ -419,7 +451,9 @@ function graph_resize(){
 function initialize_graph(){
 	graphcnt = document.querySelector('[data-js="graph_canvas_section"]');
 	graphsb = document.querySelector('[data-js="graph_tools_section"]');
-	graphtop = document.querySelector('[data-js="graph_file_section"]');
+	graphfis = document.querySelector('[data-js="graph_file_section"]');
+	brandsct = document.querySelector('[data-js="branding_section"]');
+
 
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};
