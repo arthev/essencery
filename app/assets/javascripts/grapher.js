@@ -409,12 +409,17 @@ function graph_resize(){
 	graphsb.style.height = String(graphcv.height) + "px";
 	graphsb.style.top = graphcv.style.top;
 
+
+	graphtop.style.height = graphcv.style.top;
+	graphtop.style.width = String(innerWidth - BORDER_THICKNESS - 1) + "px";
+
 	graph_redraw();
 }
 
 function initialize_graph(){
 	graphcnt = document.querySelector('[data-js="graph_canvas_section"]');
 	graphsb = document.querySelector('[data-js="graph_tools_section"]');
+	graphtop = document.querySelector('[data-js="graph_file_section"]');
 
 	ctx = graphcv.getContext("2d");
 	origin = {x:0, y:0};

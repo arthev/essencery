@@ -23,6 +23,14 @@ html, body {
 	left: 0px;
 }
 
+#graph_file_section
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	border: 2px solid #EE00EE;
+}
+
 
 .draw_tool_element_div
 {
@@ -62,6 +70,21 @@ html, body {
 	}
 }
 
+.file_tool_div {
+	float: left;
+	height: 95%;
+	width: 10%;
+	margin: 2px;
+	border: 1px solid purple;
+
+	.file_tool_img {
+		position: relative;
+		width: 80%;
+		height: 80%;
+		left: 10%;
+		top: 10%;
+	}
+}
 
 
 
