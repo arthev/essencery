@@ -1,5 +1,7 @@
 
-var CANVAS_PAGE_PERCENTAGE = 0.9; 
+var BORDER_THICKNESS = 3;
+var CANVAS_WIDTH_PERCENTAGE = 0.8;
+var CANVAS_HEIGHT_PERCENTAGE = 0.9;
 var CIRCLE_OUTLINE_WIDTH = 2;
 var EDGE_WIDTH = 2;
 var NAME_BUTT = 6;
@@ -397,13 +399,15 @@ function graph_redraw(){
 }
 
 function graph_resize(){
-	graphcv.width = innerWidth*CANVAS_PAGE_PERCENTAGE;
-	graphcv.height = innerHeight*CANVAS_PAGE_PERCENTAGE;
+	graphcv.width = innerWidth*CANVAS_WIDTH_PERCENTAGE - BORDER_THICKNESS;
+	graphcv.height = innerHeight*CANVAS_HEIGHT_PERCENTAGE;
 	//graphcv.style.left = String(get_graphcv_left()) + "px";
-	graphcv.style.left = String(innerWidth*(1.0-CANVAS_PAGE_PERCENTAGE)/1.25) + "px";
+	graphcv.style.left = String(innerWidth*(1.0-CANVAS_WIDTH_PERCENTAGE)) + "px";
+	graphcv.style.top = String(innerHeight*(1.0-CANVAS_HEIGHT_PERCENTAGE) - BORDER_THICKNESS) + "px";
 
 	graphsb.style.width = graphcv.style.left;
 	graphsb.style.height = String(graphcv.height) + "px";
+	graphsb.style.top = graphcv.style.top;
 
 	graph_redraw();
 }
