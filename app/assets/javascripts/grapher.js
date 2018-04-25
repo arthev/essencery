@@ -76,6 +76,7 @@ function save_graph(){
 		}
 	}
 
+
 	$.ajax({
 		url: window.location.href + ".json",
 	data: JSON.stringify(methodGraph),
@@ -83,6 +84,19 @@ function save_graph(){
 	contentType: "application/json",
 	success: update_client_on_response
 	});
+
+
+	var previous_tool = document.querySelector(".last_selected_tool");
+	setTimeout(function(){
+		var cladd = "last_selected_tool";
+
+		var last = document.querySelector("." + cladd);
+			if (last) {
+				last.className = last.className.replace(" " + cladd, "");
+			}
+			previous_tool.className = previous_tool.className + " " + cladd;
+
+		}, 1000);
 }
 
 
