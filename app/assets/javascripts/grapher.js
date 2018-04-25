@@ -38,8 +38,8 @@ function get_graph_coords(xi, yi){
 function get_node_by_coords(coords){
 	var potential_nodes = Object.values(method_graph).filter(
 			function(node){ 
-				return Math.abs(coords.x - node.x) <= node.r && 
-		Math.abs(coords.y - node.y) <= node.r
+				return Math.abs(coords.x - node.x - origin.x) <= node.r && 
+		Math.abs(coords.y - node.y - origin.y) <= node.r
 			}
 			)
 	if(potential_nodes.length == 0){
@@ -83,7 +83,7 @@ draw_tool_functions = {
 	null: function(){},	
 	"create_node": function (ev) {
 		var temp = "n" + get_new_id();
-		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var coords = get_graph_coords(ev.clientX - origin.x, ev.clientY - origin.y);
 		method_graph[temp] = {name: "", id: temp, element: ctool.element, category: ctool.category,
 			children: [], parents: [], r: ctool.r, 
 			x: coords.x,
@@ -170,7 +170,7 @@ function onmousedown_handler(ev){
 			ctool.element = found_node;
 		}
 		else {
-			ctool.element = null;
+			ctool.element = "blank";
 		}
 	}
 }
@@ -195,13 +195,20 @@ function onmouseup_handler(ev){
 
 function onmousemove_handler(ev){
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
+	var deltaX = coords.x - ctool.mouseX;
+	var deltaY = coords.y - ctool.mouseY;
 	ctool.mouseX = coords.x;
 	ctool.mouseY = coords.y;
 	
-	if (ctool.type == "move_node" && ctool.element){
-		ctool.element.x = ctool.mouseX;
-		ctool.element.y = ctool.mouseY;
+	if (ctool.type == "move_node" && ctool.element && ctool.element != "blank"){
+		ctool.element.x += deltaX;
+		ctool.element.y += deltaY;
 	}
+	else if (ctool.type == "move_node" && ctool.element == "blank"){
+		origin.x += deltaX;
+		origin.y += deltaY;
+	}
+	
 }
 
 
@@ -298,8 +305,8 @@ function populate_onmousemove(){
 function graph_redraw(){
 	function draw_arrow(start, end){
 		ctx.beginPath();
-		ctx.moveTo(start.x, start.y);
-		ctx.lineTo(end.x, end.y);
+		ctx.moveTo(start.x + origin.x, start.y + origin.y);
+		ctx.lineTo(end.x + origin.x, end.y + origin.y);
 		ctx.stroke();
 
 		//And now the arrow!
@@ -313,7 +320,7 @@ function graph_redraw(){
 
 		ctx.save();
 		ctx.beginPath();
-		ctx.translate( end.x, end.y );
+		ctx.translate( end.x + origin.x, end.y + origin.y );
 		ctx.rotate( angle + 90*Math.PI/180 );
 		ctx.moveTo( 0, 0 );
 		ctx.lineTo( 8, 12 );
@@ -330,6 +337,19 @@ function graph_redraw(){
 	//Draw the blank canvas first of all
 	ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
 	ctx.fillRect(0, 0, graphcv.width, graphcv.height);
+
+	//Draw the origin
+	ctx.strokeStyle = COLOURS.black;
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	ctx.moveTo(0, origin.y);
+	ctx.lineTo(graphcv.width, origin.y);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(origin.x, 0);
+	ctx.lineTo(origin.x, graphcv.height);
+	ctx.stroke();
+	
 
 
 	//Draw the parent->child edges
@@ -364,14 +384,14 @@ function graph_redraw(){
 		ctx.fillStyle = COLOURS.white;
 		ctx.lineWidth = CIRCLE_OUTLINE_WIDTH;
 		ctx.beginPath();
-		ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+		ctx.arc(node.x + origin.x, node.y + origin.y, node.r, 0, Math.PI * 2);
 		ctx.fill();
 		ctx.stroke();
 
 		var d = 1.3*node.r; //Pseudo-diameter adjusted for a little extra space for scaling
 		var di = node.r*(1.3)/2.0; //"Inverse" diameter
 		ctx.drawImage(document.getElementById(node.category + "_" + node.element),
-				node.x - di, node.y - di,
+				node.x - di + origin.x, node.y - di + origin.y,
 				d, d);
 	}
 
@@ -381,8 +401,8 @@ function graph_redraw(){
 	}
 	
 	if(ctool.type == "create_node" || (ctool.type == "name_node" && ctool.prev_type == "create_node")){
-		ctx.globalAlpha = 0.3;
-		var pseudonode = {x: ctool.mouseX, y: ctool.mouseY, r: ctool.r,
+		ctx.globalAlpha = 0.4;
+		var pseudonode = {x: ctool.mouseX - origin.x, y: ctool.mouseY - origin.y, r: ctool.r,
 			              element: ctool.element, category: ctool.category};
 		if(ctool.type == "name_node"){
 			pseudonode.element = ctool.prev_element;
@@ -399,12 +419,12 @@ function graph_redraw(){
 		var width = ctx.measureText(node.name).width;
 
 		ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-		ctx.fillRect(node.x - width/2  - NAME_BUTT/2,
-				node.y - 1.2*node.r - 14,
+		ctx.fillRect(node.x - width/2  - NAME_BUTT/2 + origin.x,
+				node.y - 1.2*node.r - 14 + origin.y,
 				width + NAME_BUTT,
 				18);
 		ctx.fillStyle = COLOURS.black;
-		ctx.fillText(node.name, node.x - width/2, node.y - 1.2*node.r);
+		ctx.fillText(node.name, node.x - width/2 + origin.x, node.y - 1.2*node.r + origin.y);
 
 		//And a box around the input for active naming...
 		if (ctool.type == "name_node" && ctool.func && ctool.element == node){
@@ -413,8 +433,8 @@ function graph_redraw(){
 			}
 			else if(frame_counter > 20){
 				ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
-				ctx.strokeRect(node.x - width/2 - NAME_BUTT/2,
-						node.y - 1.2*node.r - 14,
+				ctx.strokeRect(node.x - width/2 - NAME_BUTT/2 + origin.x,
+						node.y - 1.2*node.r - 14 + origin.y,
 						width + NAME_BUTT,
 						18);
 			}
@@ -438,7 +458,7 @@ function graph_redraw(){
 		ctx.strokeStyle = "rgb(40, 40, 40)";
 
 		var node = ctool.element;
-		var end = {x: ctool.mouseX, y: ctool.mouseY};
+		var end = {x: ctool.mouseX - origin.x, y: ctool.mouseY - origin.y};
 
 		var yComp = end.y - node.y;
 		var xComp = end.x - node.x;
@@ -482,7 +502,6 @@ function initialize_graph(){
 
 
 	ctx = graphcv.getContext("2d");
-	origin = {x:0, y:0};
 
 	ctool = {element: null, category: null, type: null, prev_type: null, prev_element: null,
 			func: null, r: 40, mouseX: 0, mouseY: 0}
@@ -491,6 +510,8 @@ function initialize_graph(){
 	populate_onmousedowns();
 	populate_onmouseups();
 	populate_onmousemove();
+
+	origin = methodGraph.origin;
 
 	document.querySelector('[data-tool_type="move_node"]').onclick();
 

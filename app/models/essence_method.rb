@@ -23,7 +23,7 @@ class EssenceMethod < ApplicationRecord
 			}
 		end
 
-		{method_graph: node_info}.to_json
+		{method_graph: node_info, origin: {x: self.x, y: self.y}}.to_json
 	end
 
 	def update_model(received_data)
@@ -39,8 +39,8 @@ class EssenceMethod < ApplicationRecord
 
 
 
-		p "PAY ATTENTION"
-		p deleted_nodes
+		self.update_attributes(received_data["origin"])
+
 		deleted_nodes.each { |nid| 
 			numeralized = Integer(nid) rescue false
 			if numeralized

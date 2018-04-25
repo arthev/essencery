@@ -21,6 +21,8 @@ ActiveRecord::Schema.define(version: 20180326105918) do
 
   create_table "essence_methods", force: :cascade do |t|
     t.string "name"
+    t.integer "x", default: 0
+    t.integer "y", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -1,6 +1,7 @@
 <%= javascript_tag do %>
 	var methodGraph = JSON.parse(<%= raw @essence_method.to_json %>);
 	var methodName = "<%= raw @essence_method.name %>";
+	var origin = {x: <%= @essence_method.x %>, y: <%= @essence_method.y %>};
 <% end %>
 
 <body class="unselectable graph_app">
