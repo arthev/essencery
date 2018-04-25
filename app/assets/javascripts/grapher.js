@@ -251,11 +251,13 @@ function populate_onclicks(){
 
 	function file_onclicker(identificator, func){
 		var filer = document.querySelector(identificator);
-		filer.onclick = generate_draw_tooler_function(
-				function (tool) {
-					func();
-				}
-				);
+		if (filer){
+			filer.onclick = generate_draw_tooler_function(
+					function (tool) {
+						func();
+					}
+					);
+		}
 	}
 
 	file_onclicker('[data-js="save_method"]',
@@ -466,6 +468,7 @@ function initialize_graph(){
 	populate_onmouseups();
 	populate_onmousemove();
 
+	document.querySelector('[data-tool_type="move_node"]').onclick();
 
 	( window.onresize = graph_resize )();
 	draw_loop_ID = window.setInterval(graph_redraw, 1000/30);
