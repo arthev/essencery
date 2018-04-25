@@ -44,7 +44,8 @@ class EssenceMethod < ApplicationRecord
 		deleted_nodes.each { |nid| 
 			numeralized = Integer(nid) rescue false
 			if numeralized
-				Node.find_by(id: nid).destroy
+				n = Node.find_by(id: nid)
+				n.destroy if n
 			else
 				raise "Bad data received in deleted_nodes" + deleted_nodes.to_s
 			end
@@ -89,6 +90,6 @@ class EssenceMethod < ApplicationRecord
 			rn.children = des_map
 			rn.save!
 		}
-		return :ok
+		return {ok: pseudo_id_transforms}
 	end
 end

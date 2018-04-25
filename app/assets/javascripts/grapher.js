@@ -51,14 +51,38 @@ function get_node_by_coords(coords){
 	);
 }
 
+
 function save_graph(){
+	function update_client_on_response(results){
+		for(id in results){
+			if(!Number.isInteger(parseInt(id))){
+				method_graph[id].id = results[id];
+				method_graph[results[id]] = method_graph[id];
+				delete method_graph[id];
+			}
+		}
+		for(id in method_graph){
+			var node = method_graph[id];
+			for(var i = 0; i < node.children.length; i++){
+				if(!Number.isInteger(parseInt(node.children[i]))){
+					node.children[i] = results[node.children[i]];
+				}
+			}
+			for(var i = 0; i < node.parents.length; i++){
+				if(!Number.isInteger(parseInt(node.parents[i]))){
+					node.parents[i] = results[node.parents[i]];
+				}
+			}
+		}
+	}
+
 	$.ajax({
 		url: window.location.href + ".json",
 	data: JSON.stringify(methodGraph),
 	type: "PATCH",
 	contentType: "application/json",
+	success: update_client_on_response
 	});
-	return "heh"
 }
 
 
@@ -273,7 +297,7 @@ function populate_onclicks(){
 	file_onclicker('[data-js="save_method"]',
 			function(){
 				save_graph();
-				window.location.href = "./";
+				//window.location.href = "./";
 			});
 	file_onclicker('[data-js="new_method"]',
 			function(){
