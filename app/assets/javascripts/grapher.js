@@ -12,6 +12,8 @@ var COLOURS = {endeavour: "#3366E3",
 	black    : "#333333",
 	white    : "#FFFFFF"};
 
+var frame_counter = 0;
+
 
 var pseudoid = 0;
 function get_new_id(){
@@ -72,6 +74,7 @@ function node_renamer_gen(node_id){
 		else if( ev.key == "Enter" ){
 			ctool.func = null;
 			ctool.type = ctool.prev_type;
+			ctool.element = ctool.prev_element;
 		}
 	}
 }
@@ -321,6 +324,8 @@ function graph_redraw(){
 		ctx.fill();
 	}
 
+	frame_counter += 1;
+
 
 	//Draw the blank canvas first of all
 	ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
@@ -354,9 +359,7 @@ function graph_redraw(){
 		}
 	}
 
-	//Draw the nodes themselves
-	for (var id in method_graph){
-		var node = method_graph[id];
+	function draw_node(node){
 		ctx.strokeStyle = COLOURS[node.category];
 		ctx.fillStyle = COLOURS.white;
 		ctx.lineWidth = CIRCLE_OUTLINE_WIDTH;
@@ -370,6 +373,22 @@ function graph_redraw(){
 		ctx.drawImage(document.getElementById(node.category + "_" + node.element),
 				node.x - di, node.y - di,
 				d, d);
+	}
+
+	//Draw the nodes themselves
+	for (var id in method_graph){
+		draw_node(method_graph[id]);
+	}
+	
+	if(ctool.type == "create_node" || (ctool.type == "name_node" && ctool.prev_type == "create_node")){
+		ctx.globalAlpha = 0.3;
+		var pseudonode = {x: ctool.mouseX, y: ctool.mouseY, r: ctool.r,
+			              element: ctool.element, category: ctool.category};
+		if(ctool.type == "name_node"){
+			pseudonode.element = ctool.prev_element;
+		}
+		draw_node(pseudonode);
+		ctx.globalAlpha = 1.0;
 	}
 
 
@@ -389,11 +408,16 @@ function graph_redraw(){
 
 		//And a box around the input for active naming...
 		if (ctool.type == "name_node" && ctool.func && ctool.element == node){
-			ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
-			ctx.strokeRect(node.x - width/2 - NAME_BUTT/2,
-					node.y - 1.2*node.r - 14,
-					width + NAME_BUTT,
-					18);
+			if(frame_counter > 60){
+				frame_counter = 0;
+			}
+			else if(frame_counter > 20){
+				ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
+				ctx.strokeRect(node.x - width/2 - NAME_BUTT/2,
+						node.y - 1.2*node.r - 14,
+						width + NAME_BUTT,
+						18);
+			}
 		}
 	}
 
@@ -471,6 +495,7 @@ function initialize_graph(){
 	document.querySelector('[data-tool_type="move_node"]').onclick();
 
 	( window.onresize = graph_resize )();
+	
 	draw_loop_ID = window.setInterval(graph_redraw, 1000/30);
 }
 
