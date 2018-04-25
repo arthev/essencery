@@ -179,7 +179,7 @@ function onmouseup_handler(ev){
 	if (ctool.type == "relation_maker"){
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
-		if ( (found_node && ctool.element) &&
+		if ( (found_node && ctool.element && ctool.element != "blank") &&
 				(found_node.id != ctool.element.id) &&
 				(ctool.element.children.indexOf(found_node.id) < 0) 
 		   ){
@@ -453,7 +453,7 @@ function graph_redraw(){
 
 
 
-	if (ctool.type == "relation_maker" && ctool.element){
+	if (ctool.type == "relation_maker" && ctool.element && ctool.element != "blank"){
 		ctx.fyllStyle = "rgb(40, 40, 40)";
 		ctx.strokeStyle = "rgb(40, 40, 40)";
 
