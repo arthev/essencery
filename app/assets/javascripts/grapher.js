@@ -469,7 +469,7 @@ function graph_redraw(){
 			if(frame_counter > 60){
 				frame_counter = 0;
 			}
-			else if(frame_counter > 20){
+			else if(frame_counter < 40){
 				ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
 				ctx.strokeRect(node.x - width/2 - NAME_BUTT/2 + origin.x,
 						node.y - 1.2*node.r - 14 + origin.y,
