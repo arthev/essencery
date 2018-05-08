@@ -4,6 +4,7 @@ const DELETE_NODE = "DELETE_NODE";
 const MOVE_NODE = "MOVE_NODE";
 const RELATION_MAKER = "RELATION_MAKER";
 
+const MOVE_ORIGIN = "MOVE_ORIGIN";
 
 
 
@@ -67,6 +68,58 @@ var ctool = {
 	}
 }
 
+var action_stack = {
+	repr: [],
+	pointer: 0,
+	CREATE_NODE: function(node){
+		this.stack_sanity();
+		this.repr.push({type: CREATE_NODE, selected_node: node});
+	},
+	DELETE_NODE: function(node){
+		this.stack_sanity();
+		this.repr.push({type: DELETE_NODE, selected_node: node});
+	},
+	MOVE_NODE: function(node, original_position){
+		this.stack_sanity();
+		this.repr.push({type: MOVE_NODE, selected_node: node, coords: original_position});
+	},
+	MOVE_ORIGIN: function(original_origin){
+		this.stack_sanity();
+		this.repr.push({type: MOVE_ORIGIN, coords: original_origin});
+	},
+	NAME_NODE: function(node, original_name, unoriginal_name){
+		this.stack_sanity();
+		this.repr.push({type: NAME_NODE, old_name: original_name, new_name: unoriginal_name});
+	},
+	stack_sanity: function(){
+		//console.log("Pointer: " + String(this.pointer));
+		//console.log("Repr: " + String(this.repr));
+		
+		this.repr = this.repr.slice(0, this.pointer);
+		this.pointer++;
+	},
+	undo: function(){
+		if(this.pointer == 0){
+			return;
+		}
+		this.pointer--;
+		var frame = this.repr[this.pointer];
+		switch(frame.type){
+			case CREATE_NODE:
+				graph_procs.DELETE_NODE(frame.selected_node);
+				break;
+			default:
+				this.pointer++;
+
+
+
+		}
+	}
+}
+
+
+
+
 
 function get_graphcv_left(){
 	return graphcv.getBoundingClientRect().left;
@@ -88,9 +141,9 @@ function get_node_by_coords(coords){
 		Math.abs(coords.y - node.y - origin.y) <= node.r
 			}
 			)
-	if(potential_nodes.length == 0){
-		return null;
-	}
+		if(potential_nodes.length == 0){
+			return null;
+		}
 	return potential_nodes.reduce( function(prev, curr){
 		return prev.r <= curr.r ? prev : curr;
 	}
@@ -137,12 +190,12 @@ function save_graph(){
 		var cladd = "last_selected_tool";
 
 		var last = document.querySelector("." + cladd);
-			if (last) {
-				last.className = last.className.replace(" " + cladd, "");
-			}
-			previous_tool.className = previous_tool.className + " " + cladd;
+		if (last) {
+			last.className = last.className.replace(" " + cladd, "");
+		}
+		previous_tool.className = previous_tool.className + " " + cladd;
 
-		}, 1000);
+	}, 1000);
 }
 
 function node_renamer(ev){
@@ -158,9 +211,39 @@ function node_renamer(ev){
 	}
 }
 
+var graph_procs = {
+	DELETE_NODE: function(node){
+		//First detach all parents and children
+		for(var i = 0; i < node.children.length; i++){
+			var parent_array = method_graph[node.children[i]].parents;
+			var index = parent_array.indexOf(node.id);
+			if(index !== -1){
+				parent_array.splice(index, 1);
+			}
+		}
+		for(var i = 0; i < node.parents.length; i++){
+			var children_array = method_graph[node.parents[i]].children;
+			var index = children_array.indexOf(node.id);
+			if(index !== -1){
+				children_array.splice(index, 1);
+			}
+		}
+
+		//Then update methodGraph.deleted_nodes if found_node.id is numerical AKA in DB
+		if(Number.isInteger(node.id)){
+			methodGraph.deleted_nodes.push(node.id);
+		}
+
+		//Then remove the node itself
+		delete method_graph[node.id];
+	}
 
 
-draw_tool_functions = {
+
+
+}
+
+var draw_tool_functions = {
 	null: function(){},	
 	CREATE_NODE: function(ev) {
 		var temp = "n" + get_new_id();
@@ -170,8 +253,9 @@ draw_tool_functions = {
 			x: coords.x,
 			y: coords.y
 		};
+		action_stack.CREATE_NODE(method_graph[temp]);
 		ctool.update({element: ctool.element, category: ctool.category, 
-				     type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
+			type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
 	},
 	NAME_NODE: function(ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
@@ -184,30 +268,33 @@ draw_tool_functions = {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
-			console.log(found_node);
+			/*
+			   console.log(found_node);
 			//First detach all parents and children
 			for(var i = 0; i < found_node.children.length; i++){
-				var parent_array = method_graph[found_node.children[i]].parents;
-				var index = parent_array.indexOf(found_node.id);
-				if(index !== -1){
-					parent_array.splice(index, 1);
-				}
+			var parent_array = method_graph[found_node.children[i]].parents;
+			var index = parent_array.indexOf(found_node.id);
+			if(index !== -1){
+			parent_array.splice(index, 1);
+			}
 			}
 			for(var i = 0; i < found_node.parents.length; i++){
-				var children_array = method_graph[found_node.parents[i]].children;
-				var index = children_array.indexOf(found_node.id);
-				if(index !== -1){
-					children_array.splice(index, 1);
-				}
+			var children_array = method_graph[found_node.parents[i]].children;
+			var index = children_array.indexOf(found_node.id);
+			if(index !== -1){
+			children_array.splice(index, 1);
 			}
-			
+			}
+
 			//Then update methodGraph.deleted_nodes if found_node.id is numerical AKA in DB
 			if(Number.isInteger(found_node.id)){
-				methodGraph.deleted_nodes.push(found_node.id);
+			methodGraph.deleted_nodes.push(found_node.id);
 			}
 
 			//Then remove the node itself
 			delete method_graph[found_node.id];
+			*/
+			graph_procs.DELETE_NODE(found_node);
 		}
 	}
 }
@@ -268,7 +355,7 @@ function onmousemove_handler(ev){
 	var deltaY = coords.y - ctool.mouseY;
 	ctool.mouseX = coords.x;
 	ctool.mouseY = coords.y;
-	
+
 	if (ctool.type == MOVE_NODE && ctool.selected_node){
 		ctool.selected_node.x += deltaX;
 		ctool.selected_node.y += deltaY;
@@ -277,7 +364,7 @@ function onmousemove_handler(ev){
 		origin.x += deltaX;
 		origin.y += deltaY;
 	}
-	
+
 }
 
 
@@ -305,7 +392,7 @@ function populate_onclicks(){
 					var new_element = tool.parentElement.dataset.semat_element;
 					var new_category = tool.dataset.semat_category;
 					ctool.update({r: ctool.r, type: CREATE_NODE, 
-						          element: new_element, category: new_category});
+						element: new_element, category: new_category});
 				}
 				);
 	}
@@ -348,6 +435,10 @@ function populate_onclicks(){
 	file_onclicker('[data-js="index_method"]',
 			function(){
 				window.location.href = "./";
+			});
+	file_onclicker('[data-js="undo_action"]',
+			function(){
+				action_stack.undo();	
 			});
 
 }
@@ -415,7 +506,7 @@ function graph_redraw(){
 	ctx.moveTo(origin.x, 0);
 	ctx.lineTo(origin.x, graphcv.height);
 	ctx.stroke();
-	
+
 
 
 	//Draw the parent->child edges
@@ -465,14 +556,14 @@ function graph_redraw(){
 	for (var id in method_graph){
 		draw_node(method_graph[id]);
 	}
-	
+
 	if(ctool.type == CREATE_NODE || (ctool.type == NAME_NODE && ctool.prev_type == CREATE_NODE)){
 		ctx.globalAlpha = 0.4;
 		var pseudonode = {x: ctool.mouseX - origin.x, y: ctool.mouseY - origin.y, r: ctool.r,
-			              element: ctool.element, category: ctool.category};
+			element: ctool.element, category: ctool.category};
 		/*if(ctool.type == NAME_NODE){
-			pseudonode.element = ctool.prev_element;
-		}*/
+		  pseudonode.element = ctool.prev_element;
+		  }*/
 		draw_node(pseudonode);
 		ctx.globalAlpha = 1.0;
 	}
@@ -580,7 +671,7 @@ function initialize_graph(){
 	document.querySelector('[data-tool_type=MOVE_NODE]').onclick();
 
 	( window.onresize = graph_resize )();
-	
+
 	draw_loop_ID = window.setInterval(graph_redraw, 1000/30);
 }
 
