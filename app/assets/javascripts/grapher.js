@@ -245,8 +245,9 @@ function save_graph(){
 	contentType: "application/json",
 	success: update_client_on_response
 	});
+}
 
-
+function file_op_selection_effect(){
 	var previous_tool = document.querySelector(".last_selected_tool");
 	setTimeout(function(){
 		var cladd = "last_selected_tool";
@@ -257,8 +258,9 @@ function save_graph(){
 		}
 		previous_tool.className = previous_tool.className + " " + cladd;
 
-	}, 1000);
+	}, 100);
 }
+
 
 function node_renamer(ev){
 	var node = ctool.selected_node;
@@ -497,6 +499,7 @@ function populate_onclicks(){
 			filer.onclick = generate_draw_tooler_function(
 					function (tool) {
 						func();
+						file_op_selection_effect();
 					}
 					);
 		}
