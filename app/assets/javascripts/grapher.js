@@ -52,13 +52,6 @@ var ctool = {
 			}
 		}
 
-		/*
-		this.element = element;
-		this.category = category;
-		this.prev_type = this.type;
-		this.type = type;
-		this.selected_node = selected_node;
-		this.r = r;*/
 	},
 	move: function (coords){
 		this.mouseX = coords.x;
@@ -184,7 +177,6 @@ draw_tool_functions = {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
-			//ctool.update(r=ctool.r, type=ctool.type, selected_node=found_node);
 			ctool.update({r: ctool.r, type: NAME_NODE, selected_node: found_node});
 		}
 	},
@@ -228,15 +220,6 @@ function keydown_handler(ev){
 
 function onclick_handler(ev) {
 	if (ctool.type == NAME_NODE){
-		/*
-		if(ctool.prev_type == CREATE_NODE){
-			ctool.type = ctool.prev_type;
-			ctool.element = ctool.prev_element;
-
-			ctool.finished_naming_node();
-		}
-		ctool.func = null;vascript 
-		*/
 		ctool.finished_naming_node();
 	}
 	else if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
@@ -251,7 +234,6 @@ function onmousedown_handler(ev){
 	mouse_down++;
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
 	var found_node = get_node_by_coords(coords);
-	console.log("Here's the found_node:" + String(found_node));
 
 	if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
 		ctool.update({r: ctool.r, type: ctool.type, selected_node: found_node});
@@ -270,10 +252,10 @@ function onmouseup_handler(ev){
 			   ctool.selected_node.children.push(found_node.id);
 			   found_node.parents.push(ctool.selected_node.id);
 		   }
-		ctool.selected_node = null;
+		ctool.update({r: ctool.r, type: RELATION_MAKER});
 	}
 	else if(ctool.type == MOVE_NODE){
-		ctool.selected_node = null;
+		ctool.update({r: ctool.r, type: MOVE_NODE});
 	}
 }
 
@@ -320,9 +302,10 @@ function populate_onclicks(){
 	for (var i = 0; i < tools.length; i++){
 		tools[i].onclick = generate_draw_tooler_function( 
 				function (tool) { 
-					ctool.element = tool.parentElement.dataset.semat_element;
-					ctool.category = tool.dataset.semat_category;
-					ctool.type = CREATE_NODE;
+					var new_element = tool.parentElement.dataset.semat_element;
+					var new_category = tool.dataset.semat_category;
+					ctool.update({r: ctool.r, type: CREATE_NODE, 
+						          element: new_element, category: new_category});
 				}
 				);
 	}
@@ -334,13 +317,6 @@ function populate_onclicks(){
 	for (var i = 0; i < op_tools.length; i++){
 		op_tools[i].onclick = generate_draw_tooler_function(
 				function (tool) {
-					//ctool.type = tool.dataset.tool_type;
-					//TODO:
-					//The overriding of prev_type for op_tools might be an ugly hack, 
-					//or it might be working decent, will find out later.
-					//ctool.prev_type = ctool.type;
-					//ctool.element = null;
-
 					//Running twice so as to override prev_type as well.
 					ctool.update({r: ctool.r, type: tool.dataset.tool_type}); 
 					ctool.update({r: ctool.r, type: tool.dataset.tool_type}); 
@@ -593,8 +569,6 @@ function initialize_graph(){
 
 	ctx = graphcv.getContext("2d");
 
-	//ctool = {element: null, category: null, type: null, prev_type: null, prev_element: null,
-	//		func: null, r: 40, mouseX: 0, mouseY: 0}
 	populate_onclicks();
 	populate_onkeydowns();
 	populate_onmousedowns();
