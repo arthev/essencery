@@ -5,6 +5,7 @@ const MOVE_NODE = "MOVE_NODE";
 const RELATION_MAKER = "RELATION_MAKER";
 
 const MOVE_ORIGIN = "MOVE_ORIGIN";
+const RELATION_REMOVER = "RELATION_REMOVER";
 
 
 
@@ -23,11 +24,18 @@ var COLOURS = {endeavour: "#3366E3",
 
 var frame_counter = 0;
 var mouse_down = 0;
-
+var old_node_name = "";
+var old_pos_holder = undefined;
 
 var pseudoid = 0;
 function get_new_id(){
 	return String(pseudoid++);
+}
+
+function slice_element(arr, i){
+	if(i !== -1){
+		arr.splice(i, 1);
+	}
 }
 
 
@@ -59,6 +67,9 @@ var ctool = {
 		this.mouseY = coords.y;
 	},
 	finished_naming_node: function(){
+		if(this.selected_node){
+			action_stack.NAME_NODE(this.selected_node, old_node_name, this.selected_node.name);	
+		}
 		if(this.prev_type == CREATE_NODE){
 			this.update({element: this.element, category: this.category, type: CREATE_NODE, r: this.r});
 		}
@@ -76,26 +87,28 @@ var action_stack = {
 		this.repr.push({type: CREATE_NODE, selected_node: node});
 	},
 	DELETE_NODE: function(node){
-		//TODO: NEEDS MORE INFO RE THE DESTRUCTED RELATIONSHIPS
 		this.stack_sanity();
 		this.repr.push({type: DELETE_NODE, selected_node: node});
 	},
 	MOVE_NODE: function(node, original_position){
 		this.stack_sanity();
-		this.repr.push({type: MOVE_NODE, selected_node: node, coords: original_position});
+		this.repr.push({type: MOVE_NODE, selected_node: node, 
+			            old_pos: original_position, new_pos: {x: node.x, y: node.y} });
 	},
-	MOVE_ORIGIN: function(original_origin){
+	MOVE_ORIGIN: function(original_origin, new_origin){
 		this.stack_sanity();
-		this.repr.push({type: MOVE_ORIGIN, coords: original_origin});
+		this.repr.push({type: MOVE_ORIGIN, old_pos: original_origin, new_pos: new_origin});
 	},
 	NAME_NODE: function(node, original_name, unoriginal_name){
 		this.stack_sanity();
-		this.repr.push({type: NAME_NODE, old_name: original_name, new_name: unoriginal_name});
+		this.repr.push({type: NAME_NODE, selected_node: node, 
+			            old_name: original_name, new_name: unoriginal_name});
+	},
+	RELATION_MAKER: function(from_node, to_node){
+		this.stack_sanity();
+		this.repr.push({type: RELATION_MAKER, from: from_node, to: to_node});
 	},
 	stack_sanity: function(){
-		//console.log("Pointer: " + String(this.pointer));
-		//console.log("Repr: " + String(this.repr));
-		
 		this.repr = this.repr.slice(0, this.pointer);
 		this.pointer++;
 	},
@@ -111,6 +124,21 @@ var action_stack = {
 				break;
 			case DELETE_NODE:
 				graph_procs.CREATE_NODE(frame.selected_node);
+				methodGraph.deleted_nodes.pop();
+				break;
+			case RELATION_MAKER:
+				graph_procs.RELATION_REMOVER(frame.from, frame.to);
+				break;
+			case NAME_NODE:
+				frame.selected_node.name = frame.old_name;
+				break;
+			case MOVE_NODE:
+				frame.selected_node.x = frame.old_pos.x;
+				frame.selected_node.y = frame.old_pos.y;
+				break;
+			case MOVE_ORIGIN:
+				origin.x = frame.old_pos.x;
+				origin.y = frame.old_pos.y;
 				break;
 			default:
 				this.pointer++;
@@ -129,6 +157,20 @@ var action_stack = {
 				break;
 			case DELETE_NODE:
 				graph_procs.DELETE_NODE(frame.selected_node);
+				break;
+			case RELATION_MAKER:
+				graph_procs.RELATION_MAKER(frame.from, frame.to);
+				break;
+			case NAME_NODE:
+				frame.selected_node.name = frame.new_name;
+				break;
+			case MOVE_NODE:
+				frame.selected_node.x = frame.new_pos.x;
+				frame.selected_node.y = frame.new_pos.y;
+				break;
+			case MOVE_ORIGIN:
+				origin.x = frame.new_pos.x;
+				origin.y = frame.new_pos.y;
 				break;
 			default:
 				this.pointer--;
@@ -237,16 +279,12 @@ var graph_procs = {
 		for(var i = 0; i < node.children.length; i++){
 			var parent_array = method_graph[node.children[i]].parents;
 			var index = parent_array.indexOf(node.id);
-			if(index !== -1){
-				parent_array.splice(index, 1);
-			}
+			slice_element(parent_array, index);
 		}
 		for(var i = 0; i < node.parents.length; i++){
 			var children_array = method_graph[node.parents[i]].children;
 			var index = children_array.indexOf(node.id);
-			if(index !== -1){
-				children_array.splice(index, 1);
-			}
+			slice_element(children_array, index);
 		}
 
 		//Then update methodGraph.deleted_nodes if found_node.id is numerical AKA in DB
@@ -276,10 +314,17 @@ var graph_procs = {
 		if(to.parents.indexOf(from.id) < 0){
 			to.parents.push(from.id);
 		}
+	},
+	RELATION_REMOVER: function(from, to){
+		if(from.id == to.id){
+			return;
+		}
+		var index = from.children.indexOf(to.id);
+		slice_element(from.children, index);
+
+		var index = to.parents.indexOf(from.id);
+		slice_element(to.parents, index);
 	}
-
-
-
 
 
 }
@@ -298,12 +343,14 @@ var draw_tool_functions = {
 		action_stack.CREATE_NODE(new_node);
 		ctool.update({element: ctool.element, category: ctool.category, 
 			type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
+		old_node_name = "";
 	},
 	NAME_NODE: function(ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
 			ctool.update({r: ctool.r, type: NAME_NODE, selected_node: found_node});
+			old_node_name = found_node.name;
 		}
 	},
 	DELETE_NODE: function (ev) {
@@ -341,6 +388,13 @@ function onmousedown_handler(ev){
 
 	if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
 		ctool.update({r: ctool.r, type: ctool.type, selected_node: found_node});
+
+		if(ctool.type == MOVE_NODE && found_node){
+			old_pos_holder = {x: found_node.x, y: found_node.y};
+		}
+		else if(ctool.type == MOVE_NODE){
+			old_pos_holder = {x: origin.x, y: origin.y};
+		}
 	}
 }
 
@@ -351,10 +405,17 @@ function onmouseup_handler(ev){
 		var found_node = get_node_by_coords(coords);
 		if(found_node && ctool.selected_node){
 			   graph_procs.RELATION_MAKER(ctool.selected_node, found_node);
+			   action_stack.RELATION_MAKER(ctool.selected_node, found_node);
 		   }
 		ctool.update({r: ctool.r, type: RELATION_MAKER});
 	}
 	else if(ctool.type == MOVE_NODE){
+		if(ctool.selected_node){
+			action_stack.MOVE_NODE(ctool.selected_node, old_pos_holder);
+		}
+		else{
+			action_stack.MOVE_ORIGIN(old_pos_holder, {x: origin.x, y: origin.y});
+		}
 		ctool.update({r: ctool.r, type: MOVE_NODE});
 	}
 }
@@ -385,6 +446,11 @@ function onmousemove_handler(ev){
 function populate_onclicks(){
 	function generate_draw_tooler_function(f){
 		return function(){
+			//Odd place to fix a NODE_NAME action stack bug...
+			if(ctool.type == NAME_NODE){
+				ctool.finished_naming_node();
+			}
+
 			//Call "main" on_click function spoofing this->tool
 			f(this);
 
