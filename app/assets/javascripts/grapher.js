@@ -62,7 +62,7 @@ var ctool = {
 		this.mouseY = coords.y;
 	},
 	finished_naming_node: function(){
-		if(this.prev_type = CREATE_NODE){
+		if(this.prev_type == CREATE_NODE){
 			this.update({element: this.element, category: this.category, type: CREATE_NODE, r: this.r});
 		}
 		else{
@@ -182,7 +182,7 @@ draw_tool_functions = {
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
 			//ctool.update(r=ctool.r, type=ctool.type, selected_node=found_node);
-			ctool.update({r: ctool.r, type: ctool.type, selected_node: "Dilly"});
+			ctool.update({r: ctool.r, type: NAME_NODE, selected_node: found_node});
 		}
 	},
 	"delete_node": function (ev) {
