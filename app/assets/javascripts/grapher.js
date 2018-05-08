@@ -76,6 +76,7 @@ var action_stack = {
 		this.repr.push({type: CREATE_NODE, selected_node: node});
 	},
 	DELETE_NODE: function(node){
+		//TODO: NEEDS MORE INFO RE THE DESTRUCTED RELATIONSHIPS
 		this.stack_sanity();
 		this.repr.push({type: DELETE_NODE, selected_node: node});
 	},
@@ -111,7 +112,20 @@ var action_stack = {
 			default:
 				this.pointer++;
 
-
+		}
+	},
+	redo: function(){
+		if(this.pointer >= this.repr.length){
+			return;
+		}
+		var frame = this.repr[this.pointer];
+		this.pointer++;
+		switch(frame.type){
+			case CREATE_NODE:
+				graph_procs.CREATE_NODE(frame.selected_node);
+				break;
+			default:
+				this.pointer--;
 
 		}
 	}
@@ -236,7 +250,16 @@ var graph_procs = {
 
 		//Then remove the node itself
 		delete method_graph[node.id];
+	},
+	CREATE_NODE: function(node){
+		method_graph[node.id] = node;
+
+
+
+
+
 	}
+
 
 
 
@@ -248,11 +271,12 @@ var draw_tool_functions = {
 	CREATE_NODE: function(ev) {
 		var temp = "n" + get_new_id();
 		var coords = get_graph_coords(ev.clientX - origin.x, ev.clientY - origin.y);
-		method_graph[temp] = {name: "", id: temp, element: ctool.element, category: ctool.category,
+		var new_node = {name: "", id: temp, element: ctool.element, category: ctool.category,
 			children: [], parents: [], r: ctool.r, 
 			x: coords.x,
 			y: coords.y
 		};
+		graph_procs.CREATE_NODE(new_node);
 		action_stack.CREATE_NODE(method_graph[temp]);
 		ctool.update({element: ctool.element, category: ctool.category, 
 			type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
@@ -439,6 +463,10 @@ function populate_onclicks(){
 	file_onclicker('[data-js="undo_action"]',
 			function(){
 				action_stack.undo();	
+			});
+	file_onclicker('[data-js="redo_action"]',
+			function(){
+				action_stack.redo();
 			});
 
 }
