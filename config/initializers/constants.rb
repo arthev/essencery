@@ -9,7 +9,7 @@ OP_TOOLS = {"move_node" => {image: "move_symbol.png",
 				            title: "Move a node."},
 			"relation_maker" => {image: "relation_symbol.png",
 								 title: "Make relations between nodes."},
-			"name_node" => {image: "rename_symbol.png",
+			"NAME_NODE" => {image: "rename_symbol.png",
 				            title: "Rename a node."},
 
 			"delete_node" => {image: "trash_symbol.png",
