@@ -1,6 +1,8 @@
-var CREATE_NODE = "CREATE_NODE";
-var NAME_NODE = "NAME_NODE";
-var DELETE_NODE = "DELETE_NODE";
+const CREATE_NODE = "CREATE_NODE";
+const NAME_NODE = "NAME_NODE";
+const DELETE_NODE = "DELETE_NODE";
+const MOVE_NODE = "MOVE_NODE";
+const RELATION_MAKER = "RELATION_MAKER";
 
 
 
@@ -19,6 +21,7 @@ var COLOURS = {endeavour: "#3366E3",
 	white    : "#FFFFFF"};
 
 var frame_counter = 0;
+var mouse_down = 0;
 
 
 var pseudoid = 0;
@@ -185,7 +188,7 @@ draw_tool_functions = {
 			ctool.update({r: ctool.r, type: NAME_NODE, selected_node: found_node});
 		}
 	},
-	"delete_node": function (ev) {
+	DELETE_NODE: function (ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
@@ -232,11 +235,11 @@ function onclick_handler(ev) {
 
 			ctool.finished_naming_node();
 		}
-		ctool.func = null;
+		ctool.func = null;vascript 
 		*/
 		ctool.finished_naming_node();
 	}
-	else if (ctool.type == "relation_maker" || ctool.type == "move_node"){
+	else if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
 		return;
 	}
 	draw_tool_functions[ctool.type](ev);
@@ -245,49 +248,50 @@ function onclick_handler(ev) {
 
 
 function onmousedown_handler(ev){
+	mouse_down++;
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
 	var found_node = get_node_by_coords(coords);
+	console.log("Here's the found_node:" + String(found_node));
 
-	if (ctool.type == "relation_maker" || ctool.type == "move_node"){
-		if (found_node){
-			ctool.element = found_node;
-		}
-		else {
-			ctool.element = "blank";
-		}
+	if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
+		ctool.update({r: ctool.r, type: ctool.type, selected_node: found_node});
 	}
 }
 
 function onmouseup_handler(ev){
-	if (ctool.type == "relation_maker"){
+	mouse_down--;
+	if (ctool.type == RELATION_MAKER){
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
-		if ( (found_node && ctool.element && ctool.element != "blank") &&
-				(found_node.id != ctool.element.id) &&
-				(ctool.element.children.indexOf(found_node.id) < 0) 
+		if ( (found_node && ctool.selected_node) &&
+				(found_node.id != ctool.selected_node.id) &&
+				(ctool.selected_node.children.indexOf(found_node.id) < 0) 
 		   ){
-			   ctool.element.children.push(found_node.id);
-			   found_node.parents.push(ctool.element.id);
+			   ctool.selected_node.children.push(found_node.id);
+			   found_node.parents.push(ctool.selected_node.id);
 		   }
-		ctool.element = null;
+		ctool.selected_node = null;
 	}
-	else if(ctool.type == "move_node"){
-		ctool.element = null;
+	else if(ctool.type == MOVE_NODE){
+		ctool.selected_node = null;
 	}
 }
 
 function onmousemove_handler(ev){
+	if(ev.buttons == 0){
+		mouse_down = 0;
+	}
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
 	var deltaX = coords.x - ctool.mouseX;
 	var deltaY = coords.y - ctool.mouseY;
 	ctool.mouseX = coords.x;
 	ctool.mouseY = coords.y;
 	
-	if (ctool.type == "move_node" && ctool.element && ctool.element != "blank"){
-		ctool.element.x += deltaX;
-		ctool.element.y += deltaY;
+	if (ctool.type == MOVE_NODE && ctool.selected_node){
+		ctool.selected_node.x += deltaX;
+		ctool.selected_node.y += deltaY;
 	}
-	else if (ctool.type == "move_node" && ctool.element == "blank"){
+	else if (ctool.type == MOVE_NODE && mouse_down > 0){
 		origin.x += deltaX;
 		origin.y += deltaY;
 	}
@@ -330,13 +334,16 @@ function populate_onclicks(){
 	for (var i = 0; i < op_tools.length; i++){
 		op_tools[i].onclick = generate_draw_tooler_function(
 				function (tool) {
-					ctool.type = tool.dataset.tool_type;
+					//ctool.type = tool.dataset.tool_type;
 					//TODO:
 					//The overriding of prev_type for op_tools might be an ugly hack, 
 					//or it might be working decent, will find out later.
-					ctool.prev_type = ctool.type;
-					ctool.element = null;
+					//ctool.prev_type = ctool.type;
+					//ctool.element = null;
 
+					//Running twice so as to override prev_type as well.
+					ctool.update({r: ctool.r, type: tool.dataset.tool_type}); 
+					ctool.update({r: ctool.r, type: tool.dataset.tool_type}); 
 				}
 				);
 	}
@@ -536,11 +543,11 @@ function graph_redraw(){
 
 
 
-	if (ctool.type == "relation_maker" && ctool.element && ctool.element != "blank"){
+	if (ctool.type == RELATION_MAKER && ctool.selected_node){
 		ctx.fyllStyle = "rgb(40, 40, 40)";
 		ctx.strokeStyle = "rgb(40, 40, 40)";
 
-		var node = ctool.element;
+		var node = ctool.selected_node;
 		var end = {x: ctool.mouseX - origin.x, y: ctool.mouseY - origin.y};
 
 		var yComp = end.y - node.y;
@@ -596,7 +603,7 @@ function initialize_graph(){
 
 	origin = methodGraph.origin;
 
-	document.querySelector('[data-tool_type="move_node"]').onclick();
+	document.querySelector('[data-tool_type=MOVE_NODE]').onclick();
 
 	( window.onresize = graph_resize )();
 	
