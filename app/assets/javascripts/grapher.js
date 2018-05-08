@@ -109,6 +109,9 @@ var action_stack = {
 			case CREATE_NODE:
 				graph_procs.DELETE_NODE(frame.selected_node);
 				break;
+			case DELETE_NODE:
+				graph_procs.CREATE_NODE(frame.selected_node);
+				break;
 			default:
 				this.pointer++;
 
@@ -123,6 +126,9 @@ var action_stack = {
 		switch(frame.type){
 			case CREATE_NODE:
 				graph_procs.CREATE_NODE(frame.selected_node);
+				break;
+			case DELETE_NODE:
+				graph_procs.DELETE_NODE(frame.selected_node);
 				break;
 			default:
 				this.pointer--;
@@ -253,11 +259,23 @@ var graph_procs = {
 	},
 	CREATE_NODE: function(node){
 		method_graph[node.id] = node;
-
-
-
-
-
+		for(var i = 0; i < node.children.length; i++){
+			graph_procs.RELATION_MAKER(node, method_graph[node.children[i]]);
+		}
+		for(var i = 0; i < node.parents.length; i++){
+			graph_procs.RELATION_MAKER(method_graph[node.parents[i]], node);
+		}
+	},
+	RELATION_MAKER: function(from, to){
+		if(from.id == to.id){
+			return;
+		}
+		if(from.children.indexOf(to.id) < 0){
+			from.children.push(to.id);
+		}
+		if(to.parents.indexOf(from.id) < 0){
+			to.parents.push(from.id);
+		}
 	}
 
 
@@ -277,7 +295,7 @@ var draw_tool_functions = {
 			y: coords.y
 		};
 		graph_procs.CREATE_NODE(new_node);
-		action_stack.CREATE_NODE(method_graph[temp]);
+		action_stack.CREATE_NODE(new_node);
 		ctool.update({element: ctool.element, category: ctool.category, 
 			type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
 	},
@@ -292,32 +310,7 @@ var draw_tool_functions = {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
 		if (found_node){
-			/*
-			   console.log(found_node);
-			//First detach all parents and children
-			for(var i = 0; i < found_node.children.length; i++){
-			var parent_array = method_graph[found_node.children[i]].parents;
-			var index = parent_array.indexOf(found_node.id);
-			if(index !== -1){
-			parent_array.splice(index, 1);
-			}
-			}
-			for(var i = 0; i < found_node.parents.length; i++){
-			var children_array = method_graph[found_node.parents[i]].children;
-			var index = children_array.indexOf(found_node.id);
-			if(index !== -1){
-			children_array.splice(index, 1);
-			}
-			}
-
-			//Then update methodGraph.deleted_nodes if found_node.id is numerical AKA in DB
-			if(Number.isInteger(found_node.id)){
-			methodGraph.deleted_nodes.push(found_node.id);
-			}
-
-			//Then remove the node itself
-			delete method_graph[found_node.id];
-			*/
+			action_stack.DELETE_NODE(found_node);
 			graph_procs.DELETE_NODE(found_node);
 		}
 	}
@@ -356,12 +349,8 @@ function onmouseup_handler(ev){
 	if (ctool.type == RELATION_MAKER){
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
-		if ( (found_node && ctool.selected_node) &&
-				(found_node.id != ctool.selected_node.id) &&
-				(ctool.selected_node.children.indexOf(found_node.id) < 0) 
-		   ){
-			   ctool.selected_node.children.push(found_node.id);
-			   found_node.parents.push(ctool.selected_node.id);
+		if(found_node && ctool.selected_node){
+			   graph_procs.RELATION_MAKER(ctool.selected_node, found_node);
 		   }
 		ctool.update({r: ctool.r, type: RELATION_MAKER});
 	}
