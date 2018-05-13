@@ -215,8 +215,10 @@ function get_node_by_coords(coords){
 
 function save_graph(){
 	function update_client_on_response(results){
+		console.log("Here comes the 'results':");
+		console.log(results);
 		for(id in results){
-			if(!Number.isInteger(parseInt(id))){
+			if(!(id == results[id])){
 				method_graph[id].id = results[id];
 				method_graph[results[id]] = method_graph[id];
 				delete method_graph[id];
@@ -225,14 +227,10 @@ function save_graph(){
 		for(id in method_graph){
 			var node = method_graph[id];
 			for(var i = 0; i < node.children.length; i++){
-				if(!Number.isInteger(parseInt(node.children[i]))){
-					node.children[i] = results[node.children[i]];
-				}
+				node.children[i] = results[node.children[i]];
 			}
 			for(var i = 0; i < node.parents.length; i++){
-				if(!Number.isInteger(parseInt(node.parents[i]))){
-					node.parents[i] = results[node.parents[i]];
-				}
+				node.parents[i] = results[node.parents[i]];
 			}
 		}
 	}

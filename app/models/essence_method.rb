@@ -56,7 +56,7 @@ class EssenceMethod < ApplicationRecord
 		#Pass to "parse" ids
 		received_graph.keys.each {|nk|
 			numeralized = Integer(nk) rescue false
-			if numeralized
+			if numeralized and self.nodes.exists?(id: nk)
 				p "currently in numeralized"
 				p numeralized
 				#byebug
