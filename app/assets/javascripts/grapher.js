@@ -514,6 +514,7 @@ function populate_onclicks(){
 			});
 	file_onclicker('[data-js="index_method"]',
 			function(){
+				save_graph();
 				window.location.href = "./";
 			});
 	file_onclicker('[data-js="undo_action"]',

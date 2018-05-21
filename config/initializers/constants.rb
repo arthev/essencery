@@ -1,5 +1,5 @@
 CATEGORIES = ["customer", "solution", "endeavour"].freeze
-ELEMENTS   = ["alpha", "activity", "work_product", "role", "competency", "pattern"].freeze
+ELEMENTS   = ["alpha", "activity", "activity_space", "competency", "pattern", "role", "work_product"].freeze
 
 COLOURS = {"customer" => "#3B9F6B", 
 		   "solution" => "#CC9900",
