@@ -8,6 +8,8 @@ const MOVE_ORIGIN = "MOVE_ORIGIN";
 const RELATION_REMOVER = "RELATION_REMOVER";
 
 
+var MIN_R = 16;
+var MIN_FONT_SIZE = 6;
 
 var BORDER_THICKNESS = 3;
 var CANVAS_WIDTH_PERCENTAGE = 0.91;
@@ -81,12 +83,14 @@ var ctool = {
 		if(this.prev_type == CREATE_NODE){
 			this.update({element: this.element, category: this.category, type: CREATE_NODE, r: this.r});
 		}
-		else if(this.prev_type == MOVE_NODE){
+		else{
 			this.update({type: MOVE_NODE, r: this.r});
 		}
-		else{
-			this.update({type: NAME_NODE, r: this.r});
-		}
+	},
+	update_radius: function(new_r){
+		var safe_r = Math.max(new_r, MIN_R);
+		this.update({element: this.element, category: this.category, type: this.type, 
+			         selected_node: this.selected_node, r: safe_r});
 	}
 }
 
@@ -488,7 +492,11 @@ function onmousemove_handler(ev){
 		origin.x += deltaX;
 		origin.y += deltaY;
 	}
+}
 
+function onwheel_handler(ev){
+	console.log(ev);
+	ctool.update_radius(ctool.r + ev.deltaY/10);
 }
 
 
@@ -589,6 +597,9 @@ function populate_onmouseups(){
 }
 function populate_onmousemove(){
 	graphcv.onmousemove = onmousemove_handler;
+}
+function populate_onwheel(){
+	graphcv.onwheel = onwheel_handler;
 }
 
 
@@ -705,18 +716,24 @@ function graph_redraw(){
 
 
 	//Draw the node names
-	ctx.font = "16px sans-serif";
+	//ctx.font = "16px sans-serif";
 	for (var id in method_graph){
 		var node = method_graph[id];
+		var font_size = parseInt(node.r / 2) - 2;
+		font_size = Math.max(font_size, MIN_FONT_SIZE);
+		ctx.font = String(font_size) + "px sans-serif";
+		console.log(ctx.font);
+
+
 		var width = ctx.measureText(node.name).width;
 
 		ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
 		ctx.fillRect(node.x - width/2  - NAME_BUTT/2 + origin.x,
-				node.y - 1.2*node.r - 14 + origin.y,
+				node.y - 1.5*node.r + origin.y,
 				width + NAME_BUTT,
-				18);
+				font_size);
 		ctx.fillStyle = COLOURS.black;
-		ctx.fillText(node.name, node.x - width/2 + origin.x, node.y - 1.2*node.r + origin.y);
+		ctx.fillText(node.name, node.x - width/2 + origin.x, node.y - 1.1*node.r + origin.y);
 
 		//And a box around the input for active naming...
 		if (ctool.type == NAME_NODE && ctool.selected_node == node){
@@ -726,9 +743,9 @@ function graph_redraw(){
 			else if(frame_counter < 40){
 				ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
 				ctx.strokeRect(node.x - width/2 - NAME_BUTT/2 + origin.x,
-						node.y - 1.2*node.r - 14 + origin.y,
+						node.y - 1.5*node.r + origin.y,
 						width + NAME_BUTT,
-						18);
+						font_size);
 			}
 		}
 	}
@@ -800,6 +817,7 @@ function initialize_graph(){
 	populate_onmousedowns();
 	populate_onmouseups();
 	populate_onmousemove();
+	populate_onwheel();
 
 	origin = methodGraph.origin;
 
