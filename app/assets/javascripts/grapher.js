@@ -38,6 +38,14 @@ function slice_element(arr, i){
 	}
 }
 
+function normalized_vector(from, to){
+	var w = to.x - from.x;
+	var h = to.y - from.y;
+	var mag = Math.sqrt(w*w + h*h);
+	return {x: w/mag, y: h/mag};
+}
+
+
 
 var ctool = {
 	element: null,
@@ -108,6 +116,10 @@ var action_stack = {
 		this.stack_sanity();
 		this.repr.push({type: RELATION_MAKER, from: from_node, to: to_node});
 	},
+	RELATION_REMOVER: function(from_node, to_node){
+		this.stack_sanity();
+		this.repr.push({type: RELATION_REMOVER, from: from_node, to: to_node});
+	},
 	stack_sanity: function(){
 		this.repr = this.repr.slice(0, this.pointer);
 		this.pointer++;
@@ -128,6 +140,9 @@ var action_stack = {
 				break;
 			case RELATION_MAKER:
 				graph_procs.RELATION_REMOVER(frame.from, frame.to);
+				break;
+			case RELATION_REMOVER:
+				graph_procs.RELATION_MAKER(frame.from, frame.to);
 				break;
 			case NAME_NODE:
 				frame.selected_node.name = frame.old_name;
@@ -160,6 +175,9 @@ var action_stack = {
 				break;
 			case RELATION_MAKER:
 				graph_procs.RELATION_MAKER(frame.from, frame.to);
+				break;
+			case RELATION_REMOVER:
+				graph_procs.RELATION_REMOVER(frame.from, frame.to);
 				break;
 			case NAME_NODE:
 				frame.selected_node.name = frame.new_name;
@@ -360,7 +378,6 @@ var draw_tool_functions = {
 			action_stack.DELETE_NODE(found_node);
 			graph_procs.DELETE_NODE(found_node);
 		}
-		/*
 		else {
 			
 			//TODO: Check for if matches a relation arrow, if so: remove that arrow.
@@ -378,32 +395,28 @@ var draw_tool_functions = {
 					     (cn.x > coords.x && pn.x > coords.x) ||
 					     (cn.y < coords.y && pn.y < coords.y) ||
 					     (cn.y > coords.y && pn.y > coords.y)) ){
-						relevant_relations.push({pn.id: cn.id});
+						relevant_relations.push({p: pn.id, c: cn.id});
 					}
 				}
 			}
 			console.log(relevant_relations);
 			for(i in relevant_relations){
 				var rel = relevant_relations[i];
-				var p = method_graph[Object.keys(rel)[0]];
-				var c = method_graph[rel[p.id]];
-				var pcoords = {x: p.x,
-					           y: p.y};
-				var ccoords = {x: c.x,
-					           y: c.y};
+				var p = method_graph[rel.p];
+				var c = method_graph[rel.c];
+				var pcoords = {x: p.x, y: p.y};
+				var ccoords = {x: c.x, y: c.y};
 				var pc_vector = normalized_vector(pcoords, ccoords);
 				var pm_vector = normalized_vector(pcoords, coords);
 				if( (Math.abs(pc_vector.x - pm_vector.x) < 0.05) &&
 					(Math.abs(pc_vector.y - pm_vector.y) < 0.05) ){
 					//TODO.
-
-
-
+					console.log("Would delete relation from " + String(p.id) + " to " + String(c.id));
+					graph_procs.RELATION_REMOVER(p, c);
+					action_stack.RELATION_REMOVER(p, c);
 				}
 			}
 		}
-
-		*/
 	}
 }
 
