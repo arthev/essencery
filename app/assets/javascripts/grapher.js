@@ -360,6 +360,50 @@ var draw_tool_functions = {
 			action_stack.DELETE_NODE(found_node);
 			graph_procs.DELETE_NODE(found_node);
 		}
+		/*
+		else {
+			
+			//TODO: Check for if matches a relation arrow, if so: remove that arrow.
+			//console.log(coords);
+			coords.x -= origin.x;
+			coords.y -= origin.y;
+			//console.log(coords);
+			//Filter away all nodes that aren't relevant.
+			var relevant_relations = [];
+			for(id in method_graph){
+				var pn = method_graph[id];
+				for(i in pn.children){
+					var cn = method_graph[pn.children[i]];
+					if(!((cn.x < coords.x && pn.x < coords.x) ||
+					     (cn.x > coords.x && pn.x > coords.x) ||
+					     (cn.y < coords.y && pn.y < coords.y) ||
+					     (cn.y > coords.y && pn.y > coords.y)) ){
+						relevant_relations.push({pn.id: cn.id});
+					}
+				}
+			}
+			console.log(relevant_relations);
+			for(i in relevant_relations){
+				var rel = relevant_relations[i];
+				var p = method_graph[Object.keys(rel)[0]];
+				var c = method_graph[rel[p.id]];
+				var pcoords = {x: p.x,
+					           y: p.y};
+				var ccoords = {x: c.x,
+					           y: c.y};
+				var pc_vector = normalized_vector(pcoords, ccoords);
+				var pm_vector = normalized_vector(pcoords, coords);
+				if( (Math.abs(pc_vector.x - pm_vector.x) < 0.05) &&
+					(Math.abs(pc_vector.y - pm_vector.y) < 0.05) ){
+					//TODO.
+
+
+
+				}
+			}
+		}
+
+		*/
 	}
 }
 
