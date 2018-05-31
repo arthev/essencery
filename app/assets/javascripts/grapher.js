@@ -81,6 +81,9 @@ var ctool = {
 		if(this.prev_type == CREATE_NODE){
 			this.update({element: this.element, category: this.category, type: CREATE_NODE, r: this.r});
 		}
+		else if(this.prev_type == MOVE_NODE){
+			this.update({type: MOVE_NODE, r: this.r});
+		}
 		else{
 			this.update({type: NAME_NODE, r: this.r});
 		}
@@ -342,9 +345,12 @@ var graph_procs = {
 
 		var index = to.parents.indexOf(from.id);
 		slice_element(to.parents, index);
+	},
+	NAME_NODE: function(node) {
+		ctool.update({element: ctool.element, category: ctool.category,
+			r: ctool.r, type: NAME_NODE, selected_node: node});
+		old_node_name = node.name;
 	}
-
-
 }
 
 var draw_tool_functions = {
@@ -359,17 +365,7 @@ var draw_tool_functions = {
 		};
 		graph_procs.CREATE_NODE(new_node);
 		action_stack.CREATE_NODE(new_node);
-		ctool.update({element: ctool.element, category: ctool.category, 
-			type: NAME_NODE, r: ctool.r, selected_node: method_graph[temp]});
-		old_node_name = "";
-	},
-	NAME_NODE: function(ev) {
-		var coords = get_graph_coords(ev.clientX, ev.clientY);
-		var found_node = get_node_by_coords(coords);
-		if (found_node){
-			ctool.update({r: ctool.r, type: NAME_NODE, selected_node: found_node});
-			old_node_name = found_node.name;
-		}
+		graph_procs.NAME_NODE(method_graph[temp]);
 	},
 	DELETE_NODE: function (ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
@@ -379,12 +375,9 @@ var draw_tool_functions = {
 			graph_procs.DELETE_NODE(found_node);
 		}
 		else {
-			
-			//TODO: Check for if matches a relation arrow, if so: remove that arrow.
-			//console.log(coords);
+			//DELETE_RELATION
 			coords.x -= origin.x;
 			coords.y -= origin.y;
-			//console.log(coords);
 			//Filter away all nodes that aren't relevant.
 			var relevant_relations = [];
 			for(id in method_graph){
@@ -399,7 +392,6 @@ var draw_tool_functions = {
 					}
 				}
 			}
-			console.log(relevant_relations);
 			for(i in relevant_relations){
 				var rel = relevant_relations[i];
 				var p = method_graph[rel.p];
@@ -410,8 +402,6 @@ var draw_tool_functions = {
 				var pm_vector = normalized_vector(pcoords, coords);
 				if( (Math.abs(pc_vector.x - pm_vector.x) < 0.05) &&
 					(Math.abs(pc_vector.y - pm_vector.y) < 0.05) ){
-					//TODO.
-					console.log("Would delete relation from " + String(p.id) + " to " + String(c.id));
 					graph_procs.RELATION_REMOVER(p, c);
 					action_stack.RELATION_REMOVER(p, c);
 				}
@@ -427,10 +417,7 @@ function keydown_handler(ev){
 }
 
 function onclick_handler(ev) {
-	if (ctool.type == NAME_NODE){
-		ctool.finished_naming_node();
-	}
-	else if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE){
+	if (ctool.type == RELATION_MAKER || ctool.type == MOVE_NODE || ctool.type == NAME_NODE){
 		return;
 	}
 	draw_tool_functions[ctool.type](ev);
@@ -440,6 +427,11 @@ function onclick_handler(ev) {
 
 function onmousedown_handler(ev){
 	mouse_down++;
+	
+	if (ctool.type == NAME_NODE){
+		ctool.finished_naming_node();
+	}
+
 	var coords = get_graph_coords(ev.clientX, ev.clientY);
 	var found_node = get_node_by_coords(coords);
 
@@ -469,11 +461,12 @@ function onmouseup_handler(ev){
 	else if(ctool.type == MOVE_NODE){
 		if(ctool.selected_node){
 			action_stack.MOVE_NODE(ctool.selected_node, old_pos_holder);
+			graph_procs.NAME_NODE(ctool.selected_node);
 		}
 		else{
 			action_stack.MOVE_ORIGIN(old_pos_holder, {x: origin.x, y: origin.y});
+			ctool.update({r: ctool.r, type: MOVE_NODE});
 		}
-		ctool.update({r: ctool.r, type: MOVE_NODE});
 	}
 }
 
