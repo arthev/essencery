@@ -721,7 +721,7 @@ function graph_redraw(){
 		var node = method_graph[id];
 		var font_size = parseInt(node.r / 2) - 2;
 		font_size = Math.max(font_size, MIN_FONT_SIZE);
-		ctx.font = String(font_size) + "px sans-serif";
+		ctx.font = String(Math.round(font_size * 1.5)) + "px sans-serif";
 		console.log(ctx.font);
 
 
