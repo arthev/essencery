@@ -44,7 +44,7 @@ class EssenceMethod < ApplicationRecord
 		deleted_nodes.each { |nid| 
 			numeralized = Integer(nid) rescue false
 			if numeralized
-				n = Node.find_by(id: nid)
+				n = self.nodes.find_by(id: nid)
 				n.destroy if n
 			else
 				raise "Bad data received in deleted_nodes" + deleted_nodes.to_s
