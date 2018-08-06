@@ -47,6 +47,26 @@ function normalized_vector(from, to){
 	return {x: w/mag, y: h/mag};
 }
 
+function insert_draw_order(node){
+	if(methodGraph.draw_order.length == 0 ||
+		node.r <= method_graph[methodGraph.draw_order[methodGraph.draw_order.length - 1]].r){
+		methodGraph.draw_order.push(node.id);
+	}
+	else{
+		for(var i = 0; i < methodGraph.draw_order.length; i++){
+			if(method_graph[methodGraph.draw_order[i]].r < node.r){
+				methodGraph.draw_order.splice(i, 0, node.id);
+				break;
+			}
+		}
+	}
+}
+
+function update_draw_order(node){
+	slice_element(methodGraph.draw_order, 
+			      methodGraph.draw_order.indexOf(node.id));
+	insert_draw_order(node);
+}
 
 
 var ctool = {
@@ -119,7 +139,7 @@ var action_stack = {
 		}
 	},
 	NAME_NODE: function(node, original_name, unoriginal_name){
-		if (!(original_name === unoriginal_name)){
+		if (original_name !== unoriginal_name){
 			this.stack_sanity();
 			this.repr.push({type: NAME_NODE, selected_node: node, 
 				            old_name: original_name, new_name: unoriginal_name});
@@ -167,6 +187,7 @@ var action_stack = {
 					frame.old_node.parents = frame.selected_node.parents;
 				}
 				method_graph[frame.selected_node.id] = frame.old_node;
+				update_draw_order(frame.old_node);
 				break;
 			case MOVE_ORIGIN:
 				origin.x = frame.old_pos.x;
@@ -206,6 +227,7 @@ var action_stack = {
 					frame.selected_node.parents = frame.old_node.parents;
 				}
 				method_graph[frame.old_node.id] = frame.selected_node;
+				update_draw_order(frame.selected_node);
 				break;
 			case MOVE_ORIGIN:
 				origin.x = frame.new_pos.x;
@@ -261,6 +283,9 @@ function save_graph(){
 				method_graph[id].id = results[id];
 				method_graph[results[id]] = method_graph[id];
 				delete method_graph[id];
+
+				methodGraph.draw_order.splice(methodGraph.draw_order.indexOf(id), 
+						                      1, results[id]);
 			}
 		}
 		for(id in method_graph){
@@ -331,6 +356,10 @@ var graph_procs = {
 			methodGraph.deleted_nodes.push(node.id);
 		}
 
+		//Remove from the drawing_order
+		slice_element(methodGraph.draw_order, methodGraph.draw_order.indexOf(node.id));
+
+
 		//Then remove the node itself
 		delete method_graph[node.id];
 	},
@@ -342,6 +371,8 @@ var graph_procs = {
 		for(var i = 0; i < node.parents.length; i++){
 			graph_procs.RELATION_MAKER(method_graph[node.parents[i]], node);
 		}
+
+		insert_draw_order(node);
 	},
 	RELATION_MAKER: function(from, to){
 		if(from.id == to.id){
@@ -482,6 +513,12 @@ function onmouseup_handler(ev){
 	}
 	else if(ctool.type == MOVE_NODE){
 		if(ctool.selected_node){
+			if(ctool.selected_node.r != ctool.old_node.r){
+		//		slice_element(methodGraph.draw_order, 
+		//				      methodGraph.draw_order.indexOf(ctool.selected_node.id));
+		//		insert_draw_order(ctool.selected_node);
+				update_draw_order(ctool.selected_node);
+			}
 			action_stack.MOVE_NODE(ctool.selected_node, ctool.old_node);
 			graph_procs.NAME_NODE(ctool.selected_node);
 		}
@@ -623,7 +660,18 @@ function populate_onwheel(){
 	graphcv.onwheel = onwheel_handler;
 }
 
-
+function populate_draw_order(){
+	for (var id in method_graph){
+		methodGraph.draw_order.push(parseInt(id));
+	}
+	console.log("Pre-sort:" + String(methodGraph.draw_order));
+	methodGraph.draw_order.sort(
+		function(a, b){
+			console.log("a: " + String(a) + "; b: " + String(b) + "\n" + String(method_graph[a].r) + "; " + String(method_graph[b].r));
+			return method_graph[b].r - method_graph[a].r;
+		});
+	console.log("Post-sort:" + String(methodGraph.draw_order));
+}
 
 
 function graph_redraw(){
@@ -720,7 +768,8 @@ function graph_redraw(){
 	}
 
 	//Draw the nodes themselves
-	for (var id in method_graph){
+	for(var i = 0; i < methodGraph.draw_order.length; i++){
+		var id = methodGraph.draw_order[i];
 		draw_node(method_graph[id]);
 	}
 
@@ -738,7 +787,8 @@ function graph_redraw(){
 
 	//Draw the node names
 	//ctx.font = "16px sans-serif";
-	for (var id in method_graph){
+	for(var i = 0; i < methodGraph.draw_order.length; i++){
+		var id = methodGraph.draw_order[i];
 		var node = method_graph[id];
 		var font_size = parseInt(node.r / 2) - 2;
 		font_size = Math.max(font_size, MIN_FONT_SIZE);
@@ -803,6 +853,8 @@ function graph_redraw(){
 	}
 }
 
+
+
 function graph_resize(){
 
 	graphcv.width = innerWidth*CANVAS_WIDTH_PERCENTAGE - BORDER_THICKNESS;
@@ -840,6 +892,8 @@ function initialize_graph(){
 	populate_onmousemove();
 	populate_onwheel();
 
+	populate_draw_order();
+
 	origin = methodGraph.origin;
 
 	document.querySelector('[data-tool_type=MOVE_NODE]').onclick();
@@ -855,6 +909,7 @@ window.addEventListener("load", function(event) {
 		console.log("All resources finished loading!");
 		console.log(methodGraph);
 		methodGraph["deleted_nodes"] = [];
+		methodGraph["draw_order"] = [];
 		method_graph = methodGraph.method_graph;
 		initialize_graph();
 	}
