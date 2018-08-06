@@ -58,6 +58,7 @@ var ctool = {
 	mouseX: 0,
 	mouseY: 0,
 	selected_node: null,
+	old_node: null,
 	update: function (param_hash) {
 		var dummy = {element: null, category: null, type: null, selected_node: null, r: 40};
 
@@ -105,10 +106,10 @@ var action_stack = {
 		this.stack_sanity();
 		this.repr.push({type: DELETE_NODE, selected_node: node});
 	},
-	MOVE_NODE: function(node, original_position){
+	MOVE_NODE: function(node, old){
 		this.stack_sanity();
-		this.repr.push({type: MOVE_NODE, selected_node: node, 
-			            old_pos: original_position, new_pos: {x: node.x, y: node.y} });
+		this.repr.push({type: MOVE_NODE, selected_node: node, old_node: old});
+			            //old_pos: original_position, new_pos: {x: node.x, y: node.y} });
 	},
 	MOVE_ORIGIN: function(original_origin, new_origin){
 		this.stack_sanity();
@@ -155,8 +156,12 @@ var action_stack = {
 				frame.selected_node.name = frame.old_name;
 				break;
 			case MOVE_NODE:
-				frame.selected_node.x = frame.old_pos.x;
-				frame.selected_node.y = frame.old_pos.y;
+				if (frame.selected_node.id != frame.old_node.id){
+					frame.old_node.id = frame.selected_node.id;
+					frame.old_node.children = frame.selected_node.children;
+					frame.old_node.parents = frame.selected_node.parents;
+				}
+				method_graph[frame.selected_node.id] = frame.old_node;
 				break;
 			case MOVE_ORIGIN:
 				origin.x = frame.old_pos.x;
@@ -190,8 +195,12 @@ var action_stack = {
 				frame.selected_node.name = frame.new_name;
 				break;
 			case MOVE_NODE:
-				frame.selected_node.x = frame.new_pos.x;
-				frame.selected_node.y = frame.new_pos.y;
+				if (frame.selected_node.id != frame.old_node.id){
+					frame.selected_node.id = frame.old_node.id;
+					frame.selected_node.children = frame.old_node.children;
+					frame.selected_node.parents = frame.old_node.parents;
+				}
+				method_graph[frame.old_node.id] = frame.selected_node;
 				break;
 			case MOVE_ORIGIN:
 				origin.x = frame.new_pos.x;
@@ -443,7 +452,11 @@ function onmousedown_handler(ev){
 		ctool.update({r: ctool.r, type: ctool.type, selected_node: found_node});
 
 		if(ctool.type == MOVE_NODE && found_node){
-			old_pos_holder = {x: found_node.x, y: found_node.y};
+			ctool.old_node = ctool.selected_node;
+			ctool.selected_node = Object.assign({}, ctool.old_node);
+			ctool.r = ctool.selected_node.r;
+			method_graph[ctool.selected_node.id] = ctool.selected_node;
+			//old_pos_holder = {x: found_node.x, y: found_node.y};
 		}
 		else if(ctool.type == MOVE_NODE){
 			old_pos_holder = {x: origin.x, y: origin.y};
@@ -464,7 +477,7 @@ function onmouseup_handler(ev){
 	}
 	else if(ctool.type == MOVE_NODE){
 		if(ctool.selected_node){
-			action_stack.MOVE_NODE(ctool.selected_node, old_pos_holder);
+			action_stack.MOVE_NODE(ctool.selected_node, ctool.old_node);
 			graph_procs.NAME_NODE(ctool.selected_node);
 		}
 		else{
@@ -495,8 +508,11 @@ function onmousemove_handler(ev){
 }
 
 function onwheel_handler(ev){
-	console.log(ev);
+	//console.log(ev);
 	ctool.update_radius(ctool.r + ev.deltaY/10);
+	if (ctool.type == MOVE_NODE && ctool.selected_node){
+		ctool.selected_node.r = ctool.r;
+	}
 }
 
 
@@ -537,7 +553,7 @@ function populate_onclicks(){
 	graphcv.onclick = onclick_handler;
 
 	var op_tools = document.querySelectorAll('[data-js="operation_tool"]');
-	console.log(op_tools);
+	//console.log(op_tools);
 	for (var i = 0; i < op_tools.length; i++){
 		op_tools[i].onclick = generate_draw_tooler_function(
 				function (tool) {
@@ -722,7 +738,7 @@ function graph_redraw(){
 		var font_size = parseInt(node.r / 2) - 2;
 		font_size = Math.max(font_size, MIN_FONT_SIZE);
 		ctx.font = String(Math.round(font_size * 1.5)) + "px sans-serif";
-		console.log(ctx.font);
+		//console.log(ctx.font);
 
 
 		var width = ctx.measureText(node.name).width;
