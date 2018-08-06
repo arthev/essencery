@@ -112,13 +112,18 @@ var action_stack = {
 			            //old_pos: original_position, new_pos: {x: node.x, y: node.y} });
 	},
 	MOVE_ORIGIN: function(original_origin, new_origin){
-		this.stack_sanity();
-		this.repr.push({type: MOVE_ORIGIN, old_pos: original_origin, new_pos: new_origin});
+		if (!(original_origin.x === new_origin.x &&
+			   original_origin.y === new_origin.y)){
+			this.stack_sanity();
+			this.repr.push({type: MOVE_ORIGIN, old_pos: original_origin, new_pos: new_origin});
+		}
 	},
 	NAME_NODE: function(node, original_name, unoriginal_name){
-		this.stack_sanity();
-		this.repr.push({type: NAME_NODE, selected_node: node, 
-			            old_name: original_name, new_name: unoriginal_name});
+		if (!(original_name === unoriginal_name)){
+			this.stack_sanity();
+			this.repr.push({type: NAME_NODE, selected_node: node, 
+				            old_name: original_name, new_name: unoriginal_name});
+		}
 	},
 	RELATION_MAKER: function(from_node, to_node){
 		this.stack_sanity();
