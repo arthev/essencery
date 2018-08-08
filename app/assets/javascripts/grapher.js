@@ -578,9 +578,6 @@ function populate_onclicks(){
 				ctool.finished_naming_node();
 			}
 
-			//Call "main" on_click function spoofing this->tool
-			f(this);
-
 			//Manipulate .last_selected_tool for user feedback re. selected_node
 			var cladd = "last_selected_tool";
 			var last = document.querySelector("." + cladd);
@@ -588,6 +585,9 @@ function populate_onclicks(){
 				last.className = last.className.replace(" " + cladd, "");
 			}
 			this.className = this.className + " " + cladd;
+
+			//Call "main" on_click function spoofing this->tool
+			f(this);
 		};
 	}
 
@@ -595,10 +595,16 @@ function populate_onclicks(){
 	for (var i = 0; i < tools.length; i++){
 		tools[i].onclick = generate_draw_tooler_function( 
 				function (tool) { 
+					if(ctool.type == REPLACE_NODE && ctool.selected_node){
+						ctool.selected_node.element = tool.parentElement.dataset.semat_element;
+						ctool.selected_node.category = tool.dataset.semat_category;
+					}
+					else{
 					var new_element = tool.parentElement.dataset.semat_element;
 					var new_category = tool.dataset.semat_category;
 					ctool.update({r: ctool.r, type: CREATE_NODE, 
 						element: new_element, category: new_category});
+					}
 				}
 				);
 	}
