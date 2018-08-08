@@ -3,6 +3,7 @@ const NAME_NODE = "NAME_NODE";
 const DELETE_NODE = "DELETE_NODE";
 const MOVE_NODE = "MOVE_NODE";
 const RELATION_MAKER = "RELATION_MAKER";
+const REPLACE_NODE = "REPLACE_NODE";
 
 const MOVE_ORIGIN = "MOVE_ORIGIN";
 const RELATION_REMOVER = "RELATION_REMOVER";
@@ -416,6 +417,17 @@ var draw_tool_functions = {
 		action_stack.CREATE_NODE(new_node);
 		graph_procs.NAME_NODE(method_graph[temp]);
 	},
+	REPLACE_NODE: function (ev) {
+		var coords = get_graph_coords(ev.clientX, ev.clientY);
+		var found_node = get_node_by_coords(coords);
+		if (found_node){
+			ctool.selected_node = found_node;
+		}
+		else{
+			console.log("REPLACE_NODE found no node at: (" + String(coords.x) + ", " + String(coords.y)+")");
+			ctool.selected_node = null;
+		}
+	},
 	DELETE_NODE: function (ev) {
 		var coords = get_graph_coords(ev.clientX, ev.clientY);
 		var found_node = get_node_by_coords(coords);
@@ -423,8 +435,7 @@ var draw_tool_functions = {
 			action_stack.DELETE_NODE(found_node);
 			graph_procs.DELETE_NODE(found_node);
 		}
-		else {
-			//DELETE_RELATION
+		else { //DELETE_RELATION
 			coords.x -= origin.x;
 			coords.y -= origin.y;
 			//Filter away all nodes that aren't relevant.
@@ -834,7 +845,7 @@ function graph_redraw(){
 
 
 	if (ctool.type == RELATION_MAKER && ctool.selected_node){
-		ctx.fyllStyle = "rgb(40, 40, 40)";
+		ctx.fillStyle = "rgb(40, 40, 40)";
 		ctx.strokeStyle = "rgb(40, 40, 40)";
 
 		var node = ctool.selected_node;
@@ -850,6 +861,19 @@ function graph_redraw(){
 
 		var start = {x: xPoint, y: yPoint};
 		draw_arrow(start, end);
+	}
+	else if (ctool.type == REPLACE_NODE && ctool.selected_node){
+		if(frame_counter > 60){
+			frame_counter = 0;
+		}
+		else if(frame_counter < 40){
+			var node = ctool.selected_node;
+			ctx.strokeStyle = "rgba(40, 40, 40, 0.6)";
+			ctx.strokeRect(node.x - node.r + origin.x,
+					node.y - node.r + origin.y,
+					2*node.r,
+					2*node.r);
+		}
 	}
 }
 
