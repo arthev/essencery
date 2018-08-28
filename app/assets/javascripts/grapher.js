@@ -704,6 +704,7 @@ function graph_redraw(){
 
 		//And now the arrow!
 		//TODO: Redo this part later to save on translate, rotate etc. by using direct trigonometry?
+		//First: Learn trigonometry!
 		//Current solution lifted from chalks.
 
 		var yComp = end.y - start.y;
